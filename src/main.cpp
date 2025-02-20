@@ -90,18 +90,18 @@ void encoder() {
       clear = true;
       sonido = true;
       POSICION++;
-      Estado++;
+     // Estado++;
      
     } else {
       clear = true;
       sonido = true;
       POSICION--;
-      Estado--;
+     // Estado--;
     
     }
 
-    if (Estado > 5) Estado = 1;
-    else if (Estado < 1) Estado = 5;
+   // if (Estado > 5) Estado = 1;
+   // else if (Estado < 1) Estado = 5;
     
 
     POSICION = min(20, max(0, POSICION));
@@ -402,97 +402,142 @@ switch (POSICION) {
 
 void loop() {
 
-switch (Estado) {
+if (Estado == 1) {
   
-   case 1:
-        
-        if (sonido == true){
-          unPitido();
-          sonido = false;
-        }
+  if (POSICION != ANTERIOR) {
+  // Serial.println(POSICION);
+   unPitido();
+   ANTERIOR = POSICION;
+}
+   if (POSICION > 4) {
+     POSICION = 1;
+   } else if (POSICION < 1) {
+     POSICION = 4;
+   }
 
-        if(clear == true){
-          lcd.clear();
-          clear = false;
-        }
-        lcd.setCursor(0, 0);
-        lcd.print("      Estado 1      ");
+switch (POSICION) {
+     case 1:
+       lcd.setCursor(0, 0);
+       lcd.print("----FOTOPERIODOS----");
+       lcd.setCursor(0, 1);
+       lcd.print(" > 20HS.ON-04HS.OFF ");
+       lcd.setCursor(0, 2);
+       lcd.print("   18HS.ON-06HS.OFF ");
+       lcd.setCursor(0, 3);
+       lcd.print("   16HS.ON-08HS.OFF ");
+       if (digitalRead(pinEnt) == LOW) Estado =2;
+      
+       break;
 
-        if (Estado == 1 && digitalRead(pinEnt) == LOW){unPitido();Estado = 6;} 
-       
-        break;
+     case 2:
+       lcd.setCursor(0, 0);
+       lcd.print("----FOTOPERIODOS----");
+       lcd.setCursor(0, 1);
+       lcd.print("   20HS.ON-04HS.OFF ");
+       lcd.setCursor(0, 2);
+       lcd.print(" > 18HS.ON-06HS.OFF ");
+       lcd.setCursor(0, 3);
+       lcd.print("   16HS.ON-08HS.OFF ");
+      
+       break;
 
-   case 2:
-        if (sonido == true){
-        unPitido();
-        sonido = false;
-        }
-        if(clear == true){
-          lcd.clear();
-          clear = false;
-        }
+     case 3:
+       lcd.setCursor(0, 0);
+       lcd.print("----FOTOPERIODOS----");
+       lcd.setCursor(0, 1);
+       lcd.print("   20HS.ON-04HS.OFF ");
+       lcd.setCursor(0, 2);
+       lcd.print("   18HS.ON-06HS.OFF ");
+       lcd.setCursor(0, 3);
+       lcd.print(" > 16HS.ON-08HS.OFF ");
+      
+       break;
+
+     case 4:
+       lcd.setCursor(0, 0);
+       lcd.print("   20HS.ON-04HS.OFF ");
+       lcd.setCursor(0, 1);
+       lcd.print("   18HS.ON-06HS.OFF ");
+       lcd.setCursor(0, 2);
+       lcd.print("   16HS.ON-08HS.OFF ");
+       lcd.setCursor(0, 3);
+       lcd.print(" > 12HS.ON-12HS.OFF ");
+      
+       break;
+   }
+
+ } 
+ else if(Estado ==2){
+ // POSICION = 1;
+  if (POSICION != ANTERIOR) {
+    // Serial.println(POSICION);
+     unPitido();
+     ANTERIOR = POSICION;
+  }
+     if (POSICION > 4) {
+       POSICION = 1;
+     } else if (POSICION < 1) {
+       POSICION = 4;
+     }
+
+     switch (POSICION) {
+
+      case 1:
         lcd.setCursor(0, 0);
-        lcd.print("      Estado 2      ");
-       
-        break;
-    
-   case 3:
-        if (sonido == true){
-        unPitido();
-        sonido = false;
-        }
-        if(clear == true){
-          lcd.clear();
-          clear = false;
-        }
-        lcd.setCursor(0, 0);
-        lcd.print("      Estado 3      ");
-        break;
-        
-   case 4:
-        if (sonido == true){
-        unPitido();
-        sonido = false;
-        }
-        if(clear == true){
-          lcd.clear();
-          clear = false;
-        }
-        lcd.setCursor(0, 0);
-        lcd.print("      Estado 4      ");
-        break;
-    
-   case 5:
-        if (sonido == true){
-        unPitido();
-        sonido = false;
-        }
-        if(clear == true){
-          lcd.clear();
-          clear = false;
-        }
-        lcd.setCursor(0, 0);
-        lcd.print("      Estado 5      ");
-        break;      
-   case 6:
-        if (sonido == true){
-        unPitido();
-        sonido = false;
-        }
-        if(clear == true){
-          lcd.clear();
-          clear = false;
-        }
-        lcd.setCursor(0, 0);
-        lcd.print("      Estado 6      ");
+        lcd.print("     ESTADO 2       ");
         lcd.setCursor(0, 1);
-        lcd.print("aca ejecuto function");
-        if(digitalRead(pinEnt) == HIGH) {Estado =6; sonido = false;}
-        if(digitalRead(pinEnt) == LOW) fotoPeriodoVeinteCeroCuatro();
-        break;          
+        lcd.print(" POSICION UNO       ");
+        lcd.setCursor(0, 2);
+        lcd.print("                    ");
+        lcd.setCursor(0, 3);
+        lcd.print("                    ");
+       
+        break;
+ 
+      case 2:
+        lcd.setCursor(0, 0);
+        lcd.print("     ESTADO 2       ");
+        lcd.setCursor(0, 1);
+        lcd.print(" POSICION DOS       ");
+        lcd.setCursor(0, 2);
+        lcd.print("                    ");
+        lcd.setCursor(0, 3);
+        lcd.print("                    ");
+       
+        break;
+ 
+      case 3:
+        lcd.setCursor(0, 0);
+        lcd.print("     ESTADO 2       ");
+        lcd.setCursor(0, 1);
+        lcd.print(" POSICION TRES      ");
+        lcd.setCursor(0, 2);
+        lcd.print("                    ");
+        lcd.setCursor(0, 3);
+        lcd.print("                    ");
+       
+        break;
+ 
+      case 4:
+        lcd.setCursor(0, 0);
+        lcd.print("     ESTADO 2       ");
+        lcd.setCursor(0, 1);
+        lcd.print(" POSICION CUATRO    ");
+        lcd.setCursor(0, 2);
+        lcd.print("  ATRAS             ");
+        lcd.setCursor(0, 3);
+        lcd.print("                    ");
+        if (digitalRead(pinEnt) == LOW)  {POSICION = 1; Estado =1;}  
+        break;
+    }
+ 
+
+
+
+ }
 }
 
-}
+
 
 // put function definitions here:
 //int myFunction(int x, int y) {
