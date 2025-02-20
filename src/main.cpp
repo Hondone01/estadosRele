@@ -78,7 +78,7 @@ void encoder() {
     
     }
 
-    POSICION = min(20, max(0, POSICION));
+    POSICION = min(100, max(0, POSICION));
     ultimaInterrupcion = tiempoInterrupcion;
   }
 }
@@ -266,7 +266,7 @@ switch (POSICION) {
        lcd.setCursor(0, 3);
        lcd.print("   12HS.ON-12HS.OFF ");
        if (sonido ==true) {unPitido(); sonido =false;}
-       if (digitalRead(pinEnt) == LOW) Estado =2;
+       if (digitalRead(pinEnt) == LOW) {dosPitidos(); Estado=2;}
       
        break;
 
@@ -346,6 +346,36 @@ switch (POSICION) {
         lcd.setCursor(0, 3);
         lcd.print("  INICIAR           ");
         if (sonido ==true) {unPitido(); sonido =false;}
+        if (digitalRead(pinEnt) == LOW){
+
+          while(true){
+            lcd.setCursor(0, 0);
+            lcd.print("   ELIGE LA HORA    ");
+            lcd.setCursor(0, 1);
+            lcd.print("   PARA INICIAR     ");
+            lcd.setCursor(0, 2);
+            lcd.print("                    ");
+           // lcd.setCursor(0, 3);
+           // lcd.print("                    ");
+            if (digitalRead(pinEnt) == LOW) return;
+
+            if (POSICION != ANTERIOR) {
+              ANTERIOR = POSICION;
+           }
+              if (POSICION > 24) {
+                lcd.setCursor(1, 3);
+                lcd.print(" ");
+                POSICION = 1;
+              } else if (POSICION < 1) {
+                POSICION = 24;
+              }
+              lcd.setCursor(0, 3);
+              lcd.print(POSICION);
+              lcd.setCursor(2, 3);
+              lcd.print("                  ");
+
+          }
+        }
        
         break;
  
