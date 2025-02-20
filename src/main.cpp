@@ -36,6 +36,13 @@ int A = 2;
 
 int ANTERIOR = 4;
 int POSICION = 1;
+int posicionHora = 0;
+int anteriorHora = 0;
+int posicionMinuto = 0;
+int anteriorMinuto = 0;
+int horaInicial = 0;
+int minutoInicial = 0;
+
 
 // Configuración del display LCD
 const int en = 2, rw = 1, rs = 0, d4 = 4, d5 = 5, d6 = 6, d7 = 7, bl = 3;
@@ -67,18 +74,27 @@ void encoder() {
 
   if (tiempoInterrupcion - ultimaInterrupcion > 100) {
     if (digitalRead(B) == HIGH) {
-     // clear = true;
       sonido = true;
       POSICION++;
+      posicionHora++;
+      posicionMinuto++;
      
     } else {
     //  clear = true;
       sonido = true;
       POSICION--;
+      posicionHora--;
+      posicionMinuto--;
     
     }
 
     POSICION = min(100, max(0, POSICION));
+    ultimaInterrupcion = tiempoInterrupcion;
+
+    posicionHora = min(37, max(0,posicionHora));
+    ultimaInterrupcion = tiempoInterrupcion;
+
+    posicionMinuto = min(61, max(0,posicionMinuto));
     ultimaInterrupcion = tiempoInterrupcion;
   }
 }
@@ -238,10 +254,6 @@ void fotoPeriodoVeinteCeroCuatro() {
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////
-
 void loop() {
 
 if (Estado == 1) {
@@ -325,6 +337,8 @@ switch (POSICION) {
 
  } 
  else if(Estado ==2){
+   
+
   if (POSICION != ANTERIOR) {
      ANTERIOR = POSICION;
   }
@@ -346,37 +360,8 @@ switch (POSICION) {
         lcd.setCursor(0, 3);
         lcd.print("  INICIAR           ");
         if (sonido ==true) {unPitido(); sonido =false;}
-        if (digitalRead(pinEnt) == LOW){
-
-          while(true){
-            lcd.setCursor(0, 0);
-            lcd.print("   ELIGE LA HORA    ");
-            lcd.setCursor(0, 1);
-            lcd.print("   PARA INICIAR     ");
-            lcd.setCursor(0, 2);
-            lcd.print("                    ");
-           // lcd.setCursor(0, 3);
-           // lcd.print("                    ");
-            if (digitalRead(pinEnt) == LOW) return;
-
-            if (POSICION != ANTERIOR) {
-              ANTERIOR = POSICION;
-           }
-              if (POSICION > 24) {
-                lcd.setCursor(1, 3);
-                lcd.print(" ");
-                POSICION = 1;
-              } else if (POSICION < 1) {
-                POSICION = 24;
-              }
-              lcd.setCursor(0, 3);
-              lcd.print(POSICION);
-              lcd.setCursor(2, 3);
-              lcd.print("                  ");
-
-          }
-        }
-       
+        if (digitalRead(pinEnt) == LOW) Estado = 3;
+        
         break;
  
       case 2:
@@ -396,4 +381,88 @@ switch (POSICION) {
     }
 
  }
+
+ else if(Estado ==3){
+ // int horaInicial = 0;
+
+  if (posicionHora != anteriorHora) {
+    anteriorHora = posicionHora;
+ }
+    if (posicionHora > 24) {
+      lcd.setCursor(1, 3);
+      lcd.print(" ");
+      posicionHora = 1;
+    } else if (posicionHora < 1) {
+      posicionHora = 24;}
+
+                lcd.setCursor(0, 0);
+                lcd.print("   ELIGE LA HORA    ");
+                lcd.setCursor(0, 1);
+                lcd.print("   PARA INICIAR     ");
+                lcd.setCursor(0, 2);
+                lcd.print("                    ");
+                lcd.setCursor(0, 3);
+                lcd.print(posicionHora);
+                lcd.setCursor(2, 3);
+                lcd.print("                  ");
+                if (digitalRead(pinEnt) == LOW){horaInicial = posicionHora;Estado=4;}
+              
+ }
+ else if(Estado == 4){
+  //int minutoInicial = 0;
+
+  if (posicionMinuto != anteriorMinuto) {
+    anteriorMinuto = posicionMinuto;
+ }
+    if (posicionMinuto > 60) {
+      posicionMinuto = 1;
+
+                  lcd.setCursor(1, 3);
+                  lcd.print(" ");
+    } else if (posicionMinuto < 1) {
+      posicionMinuto = 60;
+      }
+                  lcd.setCursor(0, 3);
+                  lcd.print(posicionMinuto);
+                  lcd.setCursor(2, 3);
+                  lcd.print("                  ");
+                  lcd.setCursor(0, 0);
+                  lcd.print(" ELIGE LOS MINUTOS  ");
+                  lcd.setCursor(0, 1);
+                  lcd.print("    PARA INICIAR    ");
+                  lcd.setCursor(0, 2);
+                  lcd.print("                    ");
+                  if (digitalRead(pinEnt) == LOW){minutoInicial = posicionMinuto;Estado = 5;}
+ }
+
+ else if(Estado == 5) {
+  bool evento_inicio = true; // Variable de control para inicio de evento con valor true
+  bool evento_fin = true;    // Variable de control para finalización de evento con valor true  
+  DateTime fecha = rtc.now(); // Obtener la hora actual del RTC 
+  if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial && evento_inicio == true) { 
+    
+   digitalWrite(RELE, HIGH);  // Activa el módulo relé
+   Serial.print("rele prendido");
+   lcd.setCursor(9, 2);
+   lcd.print("on ");
+   evento_inicio = false;     // Cambiar a falso para evitar que se active más de una vez
+ } 
+ 
+ else
+
+  
+  // Evento de apagado del fotoperíodo
+if (fecha.hour() == horaInicial + 20 && fecha.minute() == minutoInicial && evento_fin == true) { 
+DateTime fecha = rtc.now(); // Obtener la hora actual del RTC 
+Serial.print("rele apagado");
+digitalWrite(RELE, LOW);   // Desactiva el módulo relé
+lcd.setCursor(9, 2);
+lcd.print("off");
+evento_fin = false;        // Cambiar a falso para evitar que se apague más de una vez
+}
+
+else
+  if (fecha.hour() == horaInicial + 2 && fecha.minute() == minutoInicial) { evento_inicio = true;evento_fin = true;}
+ //////////// LLAVE DE CIERRE DEL VOID LOOP //////////////////
+}
 }
