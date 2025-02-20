@@ -45,26 +45,6 @@ LiquidCrystal_I2C lcd(i2c_addr, en, rw, rs, d4, d5, d6, d7, bl, POSITIVE);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*void encoder() {
-  static unsigned long ultimaInterrupcion = 0;
-
-  unsigned long tiempoInterrupcion = millis();
-
-  if (tiempoInterrupcion - ultimaInterrupcion > 100) {
-    if (digitalRead(B) == HIGH) {
-      POSICION++;
-     
-    } else {
-      POSICION--;
-      
-    }
-
-    POSICION = min(20, max(0, POSICION));
-    ultimaInterrupcion = tiempoInterrupcion;
-  }
-}
-*/
-
 void unPitido() {
   for (int i = 0; i < 1; i++) {
     int duracion = 100 / duraciones1[i];
@@ -87,22 +67,16 @@ void encoder() {
 
   if (tiempoInterrupcion - ultimaInterrupcion > 100) {
     if (digitalRead(B) == HIGH) {
-      clear = true;
+     // clear = true;
       sonido = true;
       POSICION++;
-     // Estado++;
      
     } else {
-      clear = true;
+    //  clear = true;
       sonido = true;
       POSICION--;
-     // Estado--;
     
     }
-
-   // if (Estado > 5) Estado = 1;
-   // else if (Estado < 1) Estado = 5;
-    
 
     POSICION = min(20, max(0, POSICION));
     ultimaInterrupcion = tiempoInterrupcion;
@@ -134,8 +108,6 @@ void setup() {
   }
   rtc.adjust(DateTime(__DATE__, __TIME__)); // Ajusta el reloj
 }
-
-
 
 void dosPitidos() {
   for (int i = 0; i < 2; i++) {
@@ -249,7 +221,6 @@ void fotoPeriodoVeinteCeroCuatro() {
         lcd.print("            >APAGAR ");
         break;
     }
-    
  
     if (POSICION == 1 && digitalRead(pinEnt) == LOW) {
       dosPitidos();
@@ -267,152 +238,21 @@ void fotoPeriodoVeinteCeroCuatro() {
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void preguntaVeinteCeroCuatro() {
-  
-  dosPitidos();
-  POSICION = 1;
-  
-  
-  while (true) {
-    
-    if (POSICION > 2) { 
-        POSICION = 1; 
-      } else { 
-    if (POSICION < 1) {
-       POSICION = 2; 
-      }
-    }
 
-    switch (POSICION) {
-      case 1:
-        lcd.setCursor(0, 0);
-        lcd.print(" Queres activar el  ");
-        lcd.setCursor(0, 1);
-        lcd.print(" fotoperiodo que se-");
-        lcd.setCursor(0, 2);
-        lcd.print(" leccionaste?       ");
-        lcd.setCursor(0, 3);
-        lcd.print(" > OK       REGRESAR");
-       
-        break;
-        
-      case 2:
-        lcd.setCursor(0, 0);
-        lcd.print(" Queres activar el  ");
-        lcd.setCursor(0, 1);
-        lcd.print(" fotoperiodo que se-");
-        lcd.setCursor(0, 2);
-        lcd.print(" leccionaste?       ");
-        lcd.setCursor(0, 3);
-        lcd.print("   OK     > REGRESAR");
-       
-        break;
-       
-    }
-    
-    if (POSICION == 1 && digitalRead(pinEnt) == LOW) {
-      dosPitidos();
-     fotoPeriodoVeinteCeroCuatro(); // Saltar a la etiqueta saltoFotoPeriodo
-    }
-  else {
-    if(POSICION == 2 && digitalRead(pinEnt) == LOW)  {
-      POSICION=1;
-          tresPitidos();
-          return;  // Salir de la función
-     } 
-    }
-   }
-  }
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
-
-
- //////////////////////////////////////////////////////////////////////////////////////////////////////////
- //////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/*void loop() {
-  // put your main code here, to run repeatedly:
-  if (POSICION != ANTERIOR) {
-   // Serial.println(POSICION);
-    unPitido();
-    ANTERIOR = POSICION;
- }
-    if (POSICION > 4) {
-      POSICION = 1;
-    } else if (POSICION < 1) {
-      POSICION = 4;
-    }
-
-switch (POSICION) {
-      case 1:
-        lcd.setCursor(0, 0);
-        lcd.print("----FOTOPERIODOS----");
-        lcd.setCursor(0, 1);
-        lcd.print(" > 20HS.ON-04HS.OFF ");
-        lcd.setCursor(0, 2);
-        lcd.print("   18HS.ON-06HS.OFF ");
-        lcd.setCursor(0, 3);
-        lcd.print("   16HS.ON-08HS.OFF ");
-       
-        break;
-
-      case 2:
-        lcd.setCursor(0, 0);
-        lcd.print("----FOTOPERIODOS----");
-        lcd.setCursor(0, 1);
-        lcd.print("   20HS.ON-04HS.OFF ");
-        lcd.setCursor(0, 2);
-        lcd.print(" > 18HS.ON-06HS.OFF ");
-        lcd.setCursor(0, 3);
-        lcd.print("   16HS.ON-08HS.OFF ");
-       
-        break;
-
-      case 3:
-        lcd.setCursor(0, 0);
-        lcd.print("----FOTOPERIODOS----");
-        lcd.setCursor(0, 1);
-        lcd.print("   20HS.ON-04HS.OFF ");
-        lcd.setCursor(0, 2);
-        lcd.print("   18HS.ON-06HS.OFF ");
-        lcd.setCursor(0, 3);
-        lcd.print(" > 16HS.ON-08HS.OFF ");
-       
-        break;
-
-      case 4:
-        lcd.setCursor(0, 0);
-        lcd.print("   20HS.ON-04HS.OFF ");
-        lcd.setCursor(0, 1);
-        lcd.print("   18HS.ON-06HS.OFF ");
-        lcd.setCursor(0, 2);
-        lcd.print("   16HS.ON-08HS.OFF ");
-        lcd.setCursor(0, 3);
-        lcd.print(" > 12HS.ON-12HS.OFF ");
-       
-        break;
-    }
-
-     if (POSICION == 1 && digitalRead(pinEnt) == LOW) {
-         preguntaVeinteCeroCuatro();
-  } 
-}
-*/
-
 
 void loop() {
 
 if (Estado == 1) {
   
   if (POSICION != ANTERIOR) {
-  // Serial.println(POSICION);
-   unPitido();
    ANTERIOR = POSICION;
 }
-   if (POSICION > 4) {
+   if (POSICION > 5) {
      POSICION = 1;
    } else if (POSICION < 1) {
-     POSICION = 4;
+     POSICION = 5;
    }
 
 switch (POSICION) {
@@ -424,7 +264,8 @@ switch (POSICION) {
        lcd.setCursor(0, 2);
        lcd.print("   18HS.ON-06HS.OFF ");
        lcd.setCursor(0, 3);
-       lcd.print("   16HS.ON-08HS.OFF ");
+       lcd.print("   12HS.ON-12HS.OFF ");
+       if (sonido ==true) {unPitido(); sonido =false;}
        if (digitalRead(pinEnt) == LOW) Estado =2;
       
        break;
@@ -437,7 +278,8 @@ switch (POSICION) {
        lcd.setCursor(0, 2);
        lcd.print(" > 18HS.ON-06HS.OFF ");
        lcd.setCursor(0, 3);
-       lcd.print("   16HS.ON-08HS.OFF ");
+       lcd.print("   12HS.ON-12HS.OFF ");
+       if (sonido ==true) {unPitido(); sonido =false;}
       
        break;
 
@@ -449,7 +291,8 @@ switch (POSICION) {
        lcd.setCursor(0, 2);
        lcd.print("   18HS.ON-06HS.OFF ");
        lcd.setCursor(0, 3);
-       lcd.print(" > 16HS.ON-08HS.OFF ");
+       lcd.print(" > 12HS.ON-12HS.OFF ");
+       if (sonido ==true) {unPitido(); sonido =false;}
       
        break;
 
@@ -459,87 +302,68 @@ switch (POSICION) {
        lcd.setCursor(0, 1);
        lcd.print("   18HS.ON-06HS.OFF ");
        lcd.setCursor(0, 2);
-       lcd.print("   16HS.ON-08HS.OFF ");
+       lcd.print("   12HS.ON-12HS.OFF ");
        lcd.setCursor(0, 3);
-       lcd.print(" > 12HS.ON-12HS.OFF ");
+       lcd.print(" > 36HS.ON-12HS.OFF ");
+       if (sonido ==true) {unPitido(); sonido =false;}
+      
+       break;
+
+       case 5:
+       lcd.setCursor(0, 0);
+       lcd.print("   18HS.ON-06HS.OFF ");
+       lcd.setCursor(0, 1);
+       lcd.print("   12HS.ON-12HS.OFF ");
+       lcd.setCursor(0, 2);
+       lcd.print("   36HS.ON-12HS.OFF ");
+       lcd.setCursor(0, 3);
+       lcd.print(" >  CUSTOMIZABLE    ");
+       if (sonido ==true) {unPitido(); sonido =false;}
       
        break;
    }
 
  } 
  else if(Estado ==2){
- // POSICION = 1;
   if (POSICION != ANTERIOR) {
-    // Serial.println(POSICION);
-     unPitido();
      ANTERIOR = POSICION;
   }
-     if (POSICION > 4) {
+     if (POSICION > 2) {
        POSICION = 1;
      } else if (POSICION < 1) {
-       POSICION = 4;
+       POSICION = 2;
      }
 
      switch (POSICION) {
 
       case 1:
         lcd.setCursor(0, 0);
-        lcd.print("     ESTADO 2       ");
+        lcd.print(" 20HS PRENDIDO      ");
         lcd.setCursor(0, 1);
-        lcd.print(" POSICION UNO       ");
+        lcd.print(" 04HS APAGADO       ");
         lcd.setCursor(0, 2);
         lcd.print("                    ");
         lcd.setCursor(0, 3);
-        lcd.print("                    ");
+        lcd.print("  INICIAR           ");
+        if (sonido ==true) {unPitido(); sonido =false;}
        
         break;
  
       case 2:
         lcd.setCursor(0, 0);
-        lcd.print("     ESTADO 2       ");
+        lcd.print(" 20HS PRENDIDO      ");
         lcd.setCursor(0, 1);
-        lcd.print(" POSICION DOS       ");
+        lcd.print(" 04HS APAGADO       ");
         lcd.setCursor(0, 2);
         lcd.print("                    ");
         lcd.setCursor(0, 3);
-        lcd.print("                    ");
+        lcd.print("  VOLVER            ");
+        if (sonido ==true) {unPitido(); sonido =false;}
+        if (digitalRead(pinEnt) == LOW)  {POSICION = 1; Estado =1;} 
+
+        break;
        
-        break;
- 
-      case 3:
-        lcd.setCursor(0, 0);
-        lcd.print("     ESTADO 2       ");
-        lcd.setCursor(0, 1);
-        lcd.print(" POSICION TRES      ");
-        lcd.setCursor(0, 2);
-        lcd.print("                    ");
-        lcd.setCursor(0, 3);
-        lcd.print("                    ");
-       
-        break;
- 
-      case 4:
-        lcd.setCursor(0, 0);
-        lcd.print("     ESTADO 2       ");
-        lcd.setCursor(0, 1);
-        lcd.print(" POSICION CUATRO    ");
-        lcd.setCursor(0, 2);
-        lcd.print("  ATRAS             ");
-        lcd.setCursor(0, 3);
-        lcd.print("                    ");
-        if (digitalRead(pinEnt) == LOW)  {POSICION = 1; Estado =1;}  
-        break;
     }
- 
-
-
 
  }
 }
-
-
-
-// put function definitions here:
-//int myFunction(int x, int y) {
-//  return x + y;
-//}
