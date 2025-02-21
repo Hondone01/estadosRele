@@ -278,7 +278,7 @@ switch (POSICION) {
        lcd.setCursor(0, 3);
        lcd.print("   12HS.ON-12HS.OFF ");
        if (sonido ==true) {unPitido(); sonido =false;}
-       if (digitalRead(pinEnt) == LOW) {dosPitidos(); Estado=2;}
+       if (digitalRead(pinEnt) == LOW) {dosPitidos(); Estado=2;delay(500);}
       
        break;
 
@@ -360,7 +360,7 @@ switch (POSICION) {
         lcd.setCursor(0, 3);
         lcd.print("  INICIAR           ");
         if (sonido ==true) {unPitido(); sonido =false;}
-        if (digitalRead(pinEnt) == LOW) Estado = 3;
+        if (digitalRead(pinEnt) == LOW) {Estado = 3; delay(500);}
         
         break;
  
@@ -374,7 +374,7 @@ switch (POSICION) {
         lcd.setCursor(0, 3);
         lcd.print("  VOLVER            ");
         if (sonido ==true) {unPitido(); sonido =false;}
-        if (digitalRead(pinEnt) == LOW)  {POSICION = 1; Estado =1;} 
+        if (digitalRead(pinEnt) == LOW)  {POSICION = 1; Estado =1;delay(500);} 
 
         break;
        
@@ -405,7 +405,7 @@ switch (POSICION) {
                 lcd.print(posicionHora);
                 lcd.setCursor(2, 3);
                 lcd.print("                  ");
-                if (digitalRead(pinEnt) == LOW){horaInicial = posicionHora;Estado=4;}
+                if (digitalRead(pinEnt) == LOW){horaInicial = posicionHora;Estado=4;delay(500);}
               
  }
  else if(Estado == 4){
@@ -432,37 +432,50 @@ switch (POSICION) {
                   lcd.print("    PARA INICIAR    ");
                   lcd.setCursor(0, 2);
                   lcd.print("                    ");
-                  if (digitalRead(pinEnt) == LOW){minutoInicial = posicionMinuto;Estado = 5;}
+                  if (digitalRead(pinEnt) == LOW){minutoInicial = posicionMinuto;Estado = 5;delay(500);}
  }
 
  else if(Estado == 5) {
-  bool evento_inicio = true; // Variable de control para inicio de evento con valor true
-  bool evento_fin = true;    // Variable de control para finalización de evento con valor true  
-  DateTime fecha = rtc.now(); // Obtener la hora actual del RTC 
-  if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial && evento_inicio == true) { 
-    
-   digitalWrite(RELE, HIGH);  // Activa el módulo relé
-   Serial.print("rele prendido");
-   lcd.setCursor(9, 2);
-   lcd.print("on ");
-   evento_inicio = false;     // Cambiar a falso para evitar que se active más de una vez
- } 
- 
- else
+bool evento_inicio = true; 
+bool evento_fin = true;
 
-  
-  // Evento de apagado del fotoperíodo
-if (fecha.hour() == horaInicial + 20 && fecha.minute() == minutoInicial && evento_fin == true) { 
-DateTime fecha = rtc.now(); // Obtener la hora actual del RTC 
-Serial.print("rele apagado");
-digitalWrite(RELE, LOW);   // Desactiva el módulo relé
-lcd.setCursor(9, 2);
-lcd.print("off");
-evento_fin = false;        // Cambiar a falso para evitar que se apague más de una vez
-}
+lcd.setCursor(0, 0);
+lcd.print("    FOTOPERIODO     ");
+lcd.setCursor(0, 1);
+lcd.print(" 20HS-ON / 04HS-OFF ");
+lcd.setCursor(0, 2);
+lcd.print("      ACTIVADO!     ");
+lcd.setCursor(0, 3);
+lcd.print("                    ");
 
-else
-  if (fecha.hour() == horaInicial + 2 && fecha.minute() == minutoInicial) { evento_inicio = true;evento_fin = true;}
- //////////// LLAVE DE CIERRE DEL VOID LOOP //////////////////
+  DateTime fecha = rtc.now();
+  int horaFinal = (horaInicial + 20) % 24;  // Maneja el overflow de la hora
+
+  if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial && evento_inicio == true) {
+      digitalWrite(RELE, HIGH);
+      lcd.clear();
+      lcd.setCursor(0, 0);
+      lcd.print("    LA LUZ ESTA     ");
+      lcd.setCursor(0, 1);
+      lcd.print("     PRENDIDA!      ");
+      lcd.setCursor(0, 2);
+      lcd.print("                    ");
+      lcd.setCursor(0, 3);
+      lcd.print(" Se apaga en 20hs   ");
+      evento_inicio = false;
+  }
+
+  if (fecha.hour() == horaFinal && fecha.minute() == minutoInicial && evento_fin == true) {
+      digitalWrite(RELE, LOW);
+      lcd.setCursor(9, 2);
+      lcd.print("off");
+      evento_fin = false;
+  }
+
+  if (fecha.hour() == (horaInicial + 10) % 24 && fecha.minute() == minutoInicial) {
+      evento_inicio = true;
+      evento_fin = true;
+  }
 }
+/////////////////////////////////  llave de cierre del void loop      ////////////////////////
 }
