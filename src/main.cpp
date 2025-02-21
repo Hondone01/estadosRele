@@ -16,6 +16,9 @@ RTC_DS3231 rtc; // crea objeto del tipo RTC_DS3231
 #define NOTE_AS7 3729
 
 #define BUZZER_PASIVO 5
+bool evento_inicio = true; 
+bool evento_fin = true;
+//int horaFinal = (horaInicial + 20) % 24;  // Maneja el overflow de la hora
 
 int Estado = 1; 
 
@@ -388,12 +391,12 @@ switch (POSICION) {
   if (posicionHora != anteriorHora) {
     anteriorHora = posicionHora;
  }
-    if (posicionHora > 24) {
+    if (posicionHora > 23) {
       lcd.setCursor(1, 3);
       lcd.print(" ");
       posicionHora = 1;
     } else if (posicionHora < 1) {
-      posicionHora = 24;}
+      posicionHora = 23;}
 
                 lcd.setCursor(0, 0);
                 lcd.print("   ELIGE LA HORA    ");
@@ -414,13 +417,13 @@ switch (POSICION) {
   if (posicionMinuto != anteriorMinuto) {
     anteriorMinuto = posicionMinuto;
  }
-    if (posicionMinuto > 60) {
+    if (posicionMinuto > 59) {
       posicionMinuto = 1;
 
                   lcd.setCursor(1, 3);
                   lcd.print(" ");
     } else if (posicionMinuto < 1) {
-      posicionMinuto = 60;
+      posicionMinuto = 59;
       }
                   lcd.setCursor(0, 3);
                   lcd.print(posicionMinuto);
@@ -451,9 +454,15 @@ lcd.print("                    ");
   DateTime fecha = rtc.now();
   int horaFinal = (horaInicial + 20) % 24;  // Maneja el overflow de la hora
 
-  if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial && evento_inicio == true) {
+  if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial && evento_inicio == true)Estado = 6;
+ }
+
+ else if (Estado == 6)
+  {
+   DateTime fecha = rtc.now();
+    int horaFinal = (horaInicial + 20) % 24;  // Maneja el overflow de la hora
+    
       digitalWrite(RELE, HIGH);
-      lcd.clear();
       lcd.setCursor(0, 0);
       lcd.print("    LA LUZ ESTA     ");
       lcd.setCursor(0, 1);
@@ -463,8 +472,8 @@ lcd.print("                    ");
       lcd.setCursor(0, 3);
       lcd.print(" Se apaga en 20hs   ");
       evento_inicio = false;
-  }
-
+  
+  
   if (fecha.hour() == horaFinal && fecha.minute() == minutoInicial && evento_fin == true) {
       digitalWrite(RELE, LOW);
       lcd.setCursor(9, 2);
