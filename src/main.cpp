@@ -37,11 +37,6 @@ int pinEnt = 4;
 int B = 3;
 int A = 2;
 
-//Declaracion para mostrar la hora
-
-unsigned long reloj;
-unsigned long muestraReloj=0;
-
 int ANTERIOR = 4;
 int POSICION = 1;
 int posicionHora = 0;
@@ -150,8 +145,7 @@ void tresPitidos() {
 ////////////////////////////////////////////////////////////////////////////////////
 
 void loop() {
-  reloj = millis();
-  DateTime fecha = rtc.now();
+ // DateTime fecha = rtc.now();
  // if(reloj-muestraReloj >= 60000)
     if (Estado == 1) {
 
@@ -321,17 +315,6 @@ void loop() {
         lcd.print(":");
         lcd.setCursor(16,0);
         lcd.print(fecha.minute());
-
-        if(reloj - muestraReloj >= 60000){
-          lcd.setCursor(12,0);
-          lcd.print(" ");
-          lcd.setCursor(13,0);
-          lcd.print(fecha.hour());
-          lcd.setCursor(15,0);
-          lcd.print(":");
-          lcd.setCursor(16,0);
-          lcd.print(fecha.minute());
-        }
         lcd.setCursor(0, 1);
         lcd.print("   ELIGE LA HORA    ");
         lcd.setCursor(0, 2);
@@ -380,21 +363,10 @@ void loop() {
           lcd.print(":");
           lcd.setCursor(16,0);
           lcd.print(fecha.minute());
-
-          if(reloj - muestraReloj >= 60000){
-          lcd.setCursor(12,0);
-          lcd.print(" ");
-          lcd.setCursor(13,0);
-          lcd.print(fecha.hour());
-          lcd.setCursor(15,0);
-          lcd.print(":");
-          lcd.setCursor(16,0);
-          lcd.print(fecha.minute());
-        }
-        lcd.setCursor(0, 1);
-        lcd.print(" ELIGE LOS MINUTOS  ");
-        lcd.setCursor(0, 2);
-        lcd.print("    PARA INICIAR    ");
+          lcd.setCursor(0, 1);
+          lcd.print(" ELIGE LOS MINUTOS  ");
+          lcd.setCursor(0, 2);
+          lcd.print("    PARA INICIAR    ");
         if(posicionMinuto < 10){
           lcd.setCursor(0, 3);
           lcd.print("0");
