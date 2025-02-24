@@ -16,9 +16,10 @@ RTC_DS3231 rtc; // crea objeto del tipo RTC_DS3231
 #define NOTE_AS7 3729
 
 #define BUZZER_PASIVO 5
-bool evento_inicio = true;
-bool evento_fin = true;
-// int horaFinal = (horaInicial + 20) % 24;  // Maneja el overflow de la hora
+
+//bool evento_inicio = true;
+//bool evento_fin = true;
+
 
 int Estado = 1;
 
@@ -44,7 +45,8 @@ int posicionMinuto = 0;
 int anteriorMinuto = 0;
 int horaInicial = 0;
 int minutoInicial = 0;
-
+//int minutoFinal = minutoInicial+2;
+int horaFinal = (horaInicial + 1) % 24;  // Maneja el overflow de la hora
 // Configuración del display LCD
 const int en = 2, rw = 1, rs = 0, d4 = 4, d5 = 5, d6 = 6, d7 = 7, bl = 3;
 const int i2c_addr = 0x27;
@@ -77,7 +79,7 @@ void encoder() {
         POSICION = min(100, max(0, POSICION));
         ultimaInterrupcion = tiempoInterrupcion;
 
-        posicionHora = min(37, max(0, posicionHora));
+        posicionHora = min(37, max(-1, posicionHora));
         ultimaInterrupcion = tiempoInterrupcion;
 
         posicionMinuto = min(61, max(0, posicionMinuto));
@@ -290,7 +292,6 @@ void loop() {
         }
 
     } else if (Estado == 3) {
-        // int horaInicial = 0;
 
         if (posicionHora != anteriorHora) {
             anteriorHora = posicionHora;
@@ -298,10 +299,15 @@ void loop() {
         if (posicionHora > 23) {
             lcd.setCursor(1, 3);
             lcd.print(" ");
-            posicionHora = 1;
-        } else if (posicionHora < 1) {
+            posicionHora = 0;
+        } else if (posicionHora < 0) {
             posicionHora = 23;
+        } else if (posicionHora < 10){
+            lcd.setCursor(1, 3);
+            lcd.print(" ");
         }
+
+       // int horaInicial = 0;
 
         lcd.setCursor(0, 0);
         lcd.print("   ELIGE LA HORA    ");
@@ -320,19 +326,23 @@ void loop() {
         }
 
     } else if (Estado == 4) {
-        // int minutoInicial = 0;
 
         if (posicionMinuto != anteriorMinuto) {
             anteriorMinuto = posicionMinuto;
         }
         if (posicionMinuto > 59) {
-            posicionMinuto = 1;
-
             lcd.setCursor(1, 3);
             lcd.print(" ");
+            posicionMinuto = 1;
         } else if (posicionMinuto < 1) {
             posicionMinuto = 59;
+        } else if (posicionMinuto < 10) {
+            lcd.setCursor(1,3);
+            lcd.print(" ");
         }
+
+        //int minutoInicial = 0;
+
         lcd.setCursor(0, 3);
         lcd.print(posicionMinuto);
         lcd.setCursor(2, 3);
@@ -350,8 +360,8 @@ void loop() {
         }
 
     } else if (Estado == 5) {
-        bool evento_inicio = true;
-        bool evento_fin = true;
+        //bool evento_inicio = true;
+       // bool evento_fin = true;
 
         lcd.setCursor(0, 0);
         lcd.print("    FOTOPERIODO     ");
@@ -363,14 +373,15 @@ void loop() {
         lcd.print("                    ");
 
         DateTime fecha = rtc.now();
-        int horaFinal = (horaInicial + 20) % 24;  // Maneja el overflow de la hora
+        horaFinal = (horaInicial + 1) % 24;  // Maneja el overflow de la hora
 
-        if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial && evento_inicio == true) Estado = 6;
+        if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial){lcd.clear(); Estado = 6;} 
     }
 
     else if (Estado == 6) {
         DateTime fecha = rtc.now();
-        int horaFinal = (horaInicial + 20) % 24;  // Maneja el overflow de la hora
+       // int horaFinal = (horaInicial + 20) % 24;  // Maneja el overflow de la hora
+       // bool evento_fin = true;
 
         digitalWrite(RELE, HIGH);
         lcd.setCursor(0, 0);
@@ -378,21 +389,55 @@ void loop() {
         lcd.setCursor(0, 1);
         lcd.print("     PRENDIDA!      ");
         lcd.setCursor(0, 2);
-        lcd.print("                    ");
+        lcd.print("Inicia:");
+        lcd.setCursor(8,2);
+        lcd.print(horaInicial);
+        lcd.setCursor(10,2);
+        lcd.print(":");
+        lcd.setCursor(11,2);
+        lcd.print(minutoInicial);
         lcd.setCursor(0, 3);
-        lcd.print(" Se apaga en 20hs   ");
-        evento_inicio = false;
+        lcd.print("Termina:");
+        lcd.setCursor(9,3);
+        lcd.print(horaFinal);
+        lcd.setCursor(11,3);
+        lcd.print(":");
+        lcd.setCursor(12,3);
+        lcd.print(minutoInicial);
 
-        if (fecha.hour() == horaFinal && fecha.minute() == minutoInicial && evento_fin == true) {
-            digitalWrite(RELE, LOW);
-            lcd.setCursor(9, 2);
-            lcd.print("off");
-            evento_fin = false;
+        if (fecha.hour() == horaFinal && fecha.minute() == minutoInicial) {
+            lcd.clear();
+            Estado = 7;
         }
+    } else if (Estado == 7) {
+        DateTime fecha = rtc.now();
+        digitalWrite(RELE, LOW);
 
-        if (fecha.hour() == (horaInicial + 10) % 24 && fecha.minute() == minutoInicial) {
-            evento_inicio = true;
-            evento_fin = true;
+        lcd.setCursor(0, 0);
+        lcd.print("    LA LUZ ESTA     ");
+        lcd.setCursor(0, 1);
+        lcd.print("     APAGADA!       ");
+        lcd.setCursor(0, 2);
+        lcd.print("Inicia:");
+        lcd.setCursor(8,2);
+        lcd.print(horaInicial);
+        lcd.setCursor(10,2);
+        lcd.print(":");
+        lcd.setCursor(11,2);
+        lcd.print(minutoInicial);
+        lcd.setCursor(0, 3);
+        lcd.print("Termina:");
+        lcd.setCursor(9,3);
+        lcd.print(horaFinal);
+        lcd.setCursor(11,3);
+        lcd.print(":");
+        lcd.setCursor(12,3);
+        lcd.print(minutoInicial);
+           
+        if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial) {
+        lcd.clear();
+        Estado = 6;
         }
     }
+    
 }
