@@ -37,6 +37,11 @@ int pinEnt = 4;
 int B = 3;
 int A = 2;
 
+//Declaracion para mostrar la hora
+
+unsigned long reloj;
+unsigned long muestraReloj=0;
+
 int ANTERIOR = 4;
 int POSICION = 1;
 int posicionHora = 0;
@@ -145,6 +150,9 @@ void tresPitidos() {
 ////////////////////////////////////////////////////////////////////////////////////
 
 void loop() {
+  reloj = millis();
+  DateTime fecha = rtc.now();
+ // if(reloj-muestraReloj >= 60000)
     if (Estado == 1) {
 
         if (POSICION != ANTERIOR) {
@@ -292,7 +300,7 @@ void loop() {
         }
 
     } else if (Estado == 3) {
-
+        DateTime fecha = rtc.now();
         if (posicionHora != anteriorHora) {
             anteriorHora = posicionHora;
         }
@@ -303,13 +311,32 @@ void loop() {
         } 
 
        // int horaInicial = 0;
-
         lcd.setCursor(0, 0);
-        lcd.print("   ELIGE LA HORA    ");
+        lcd.print("Hora actual:");
+        lcd.setCursor(12,0);
+        lcd.print(" ");
+        lcd.setCursor(13,0);
+        lcd.print(fecha.hour());
+        lcd.setCursor(15,0);
+        lcd.print(":");
+        lcd.setCursor(16,0);
+        lcd.print(fecha.minute());
+
+        if(reloj - muestraReloj >= 60000){
+          lcd.setCursor(12,0);
+          lcd.print(" ");
+          lcd.setCursor(13,0);
+          lcd.print(fecha.hour());
+          lcd.setCursor(15,0);
+          lcd.print(":");
+          lcd.setCursor(16,0);
+          lcd.print(fecha.minute());
+        }
         lcd.setCursor(0, 1);
-        lcd.print("   PARA INICIAR     ");
+        lcd.print("   ELIGE LA HORA    ");
         lcd.setCursor(0, 2);
-        lcd.print("                    ");
+        lcd.print("   PARA INICIAR     ");
+        
         if(posicionHora < 10){
           lcd.setCursor(0, 3);
           lcd.print("0");
@@ -332,7 +359,7 @@ void loop() {
         }
 
     } else if (Estado == 4) {
-
+        DateTime fecha = rtc.now();
         if (posicionMinuto != anteriorMinuto) {
             anteriorMinuto = posicionMinuto;
         }
@@ -343,13 +370,31 @@ void loop() {
         } 
 
         //int minutoInicial = 0;
+          lcd.setCursor(0, 0);
+          lcd.print("Hora actual:");
+          lcd.setCursor(12,0);
+          lcd.print(" ");
+          lcd.setCursor(13,0);
+          lcd.print(fecha.hour());
+          lcd.setCursor(15,0);
+          lcd.print(":");
+          lcd.setCursor(16,0);
+          lcd.print(fecha.minute());
 
-        lcd.setCursor(0, 0);
-        lcd.print(" ELIGE LOS MINUTOS  ");
+          if(reloj - muestraReloj >= 60000){
+          lcd.setCursor(12,0);
+          lcd.print(" ");
+          lcd.setCursor(13,0);
+          lcd.print(fecha.hour());
+          lcd.setCursor(15,0);
+          lcd.print(":");
+          lcd.setCursor(16,0);
+          lcd.print(fecha.minute());
+        }
         lcd.setCursor(0, 1);
-        lcd.print("    PARA INICIAR    ");
+        lcd.print(" ELIGE LOS MINUTOS  ");
         lcd.setCursor(0, 2);
-        lcd.print("                    ");
+        lcd.print("    PARA INICIAR    ");
         if(posicionMinuto < 10){
           lcd.setCursor(0, 3);
           lcd.print("0");
@@ -380,7 +425,7 @@ void loop() {
         lcd.setCursor(0, 1);
         lcd.print("      ACTIVADO!     ");
         lcd.setCursor(0, 2);
-        lcd.print("Inicia:");
+        lcd.print("Inicia: ");
         if(horaInicial < 10){
           lcd.setCursor(8, 2);
           lcd.print("0");
@@ -398,12 +443,12 @@ void loop() {
           lcd.setCursor(12, 2);
           lcd.print(minutoInicial);
           lcd.setCursor(13,2);
-          lcd.print("hs");
+          lcd.print("hs ");
         } else if(minutoInicial >= 10){
           lcd.setCursor(11,2);
           lcd.print(minutoInicial);
           lcd.setCursor(13,2);
-          lcd.print("hs");
+          lcd.print("hs ");
         }   
         lcd.setCursor(0, 3);
         lcd.print("Termina: ");
