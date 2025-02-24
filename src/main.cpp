@@ -297,14 +297,14 @@ void loop() {
             anteriorHora = posicionHora;
         }
         if (posicionHora > 23) {
-            lcd.setCursor(1, 3);
-            lcd.print(" ");
+        //    lcd.setCursor(1, 3);
+        //    lcd.print(" ");
             posicionHora = 0;
         } else if (posicionHora < 0) {
             posicionHora = 23;
         } else if (posicionHora < 10){
-            lcd.setCursor(1, 3);
-            lcd.print(" ");
+        //    lcd.setCursor(1, 3);
+        //    lcd.print(" ");
         }
 
        // int horaInicial = 0;
@@ -315,8 +315,15 @@ void loop() {
         lcd.print("   PARA INICIAR     ");
         lcd.setCursor(0, 2);
         lcd.print("                    ");
-        lcd.setCursor(0, 3);
-        lcd.print(posicionHora);
+        if(posicionHora < 10){
+          lcd.setCursor(0, 3);
+          lcd.print("0");
+          lcd.setCursor(1, 3);
+          lcd.print(posicionHora);
+        } else if(posicionHora >= 10){
+          lcd.setCursor(0,3);
+          lcd.print(posicionHora);
+        }   
         lcd.setCursor(2, 3);
         lcd.print("                  ");
         if (digitalRead(pinEnt) == LOW) {
@@ -331,28 +338,35 @@ void loop() {
             anteriorMinuto = posicionMinuto;
         }
         if (posicionMinuto > 59) {
-            lcd.setCursor(1, 3);
-            lcd.print(" ");
+         //   lcd.setCursor(1, 3);
+         //   lcd.print(" ");
             posicionMinuto = 1;
         } else if (posicionMinuto < 1) {
             posicionMinuto = 59;
         } else if (posicionMinuto < 10) {
-            lcd.setCursor(1,3);
-            lcd.print(" ");
+         //   lcd.setCursor(1,3);
+         //   lcd.print(" ");
         }
 
         //int minutoInicial = 0;
 
-        lcd.setCursor(0, 3);
-        lcd.print(posicionMinuto);
-        lcd.setCursor(2, 3);
-        lcd.print("                  ");
         lcd.setCursor(0, 0);
         lcd.print(" ELIGE LOS MINUTOS  ");
         lcd.setCursor(0, 1);
         lcd.print("    PARA INICIAR    ");
         lcd.setCursor(0, 2);
         lcd.print("                    ");
+        if(posicionMinuto < 10){
+          lcd.setCursor(0, 3);
+          lcd.print("0");
+          lcd.setCursor(1, 3);
+          lcd.print(posicionMinuto);
+        } else if(posicionMinuto >= 10){
+          lcd.setCursor(0,3);
+          lcd.print(posicionMinuto);
+        }
+        lcd.setCursor(2, 3);
+        lcd.print("                  ");   
         if (digitalRead(pinEnt) == LOW) {
             minutoInicial = posicionMinuto;
             Estado = 5;
@@ -364,13 +378,25 @@ void loop() {
        // bool evento_fin = true;
 
         lcd.setCursor(0, 0);
-        lcd.print("    FOTOPERIODO     ");
-        lcd.setCursor(0, 1);
         lcd.print(" 20HS-ON / 04HS-OFF ");
-        lcd.setCursor(0, 2);
+        lcd.setCursor(0, 1);
         lcd.print("      ACTIVADO!     ");
+        lcd.setCursor(0, 2);
+        lcd.print("Inicia:");
+        lcd.setCursor(8,2);
+        lcd.print(horaInicial);
+        lcd.setCursor(10,2);
+        lcd.print(":");
+        lcd.setCursor(11,2);
+        lcd.print(minutoInicial);
         lcd.setCursor(0, 3);
-        lcd.print("                    ");
+        lcd.print("Termina:");
+        lcd.setCursor(9,3);
+        lcd.print(horaFinal);
+        lcd.setCursor(11,3);
+        lcd.print(":");
+        lcd.setCursor(12,3);
+        lcd.print(minutoInicial);
 
         DateTime fecha = rtc.now();
         horaFinal = (horaInicial + 1) % 24;  // Maneja el overflow de la hora
@@ -389,21 +415,17 @@ void loop() {
         lcd.setCursor(0, 1);
         lcd.print("     PRENDIDA!      ");
         lcd.setCursor(0, 2);
-        lcd.print("Inicia:");
-        lcd.setCursor(8,2);
-        lcd.print(horaInicial);
-        lcd.setCursor(10,2);
-        lcd.print(":");
-        lcd.setCursor(11,2);
-        lcd.print(minutoInicial);
+        lcd.print("                    ");
         lcd.setCursor(0, 3);
-        lcd.print("Termina:");
-        lcd.setCursor(9,3);
+        lcd.print("Se apaga:"); 
+        lcd.setCursor(10,3);
         lcd.print(horaFinal);
-        lcd.setCursor(11,3);
-        lcd.print(":");
         lcd.setCursor(12,3);
+        lcd.print(":");
+        lcd.setCursor(13,3);
         lcd.print(minutoInicial);
+        lcd.setCursor(16, 03);
+        lcd.print("hs.");
 
         if (fecha.hour() == horaFinal && fecha.minute() == minutoInicial) {
             lcd.clear();
@@ -418,21 +440,17 @@ void loop() {
         lcd.setCursor(0, 1);
         lcd.print("     APAGADA!       ");
         lcd.setCursor(0, 2);
-        lcd.print("Inicia:");
-        lcd.setCursor(8,2);
-        lcd.print(horaInicial);
-        lcd.setCursor(10,2);
-        lcd.print(":");
-        lcd.setCursor(11,2);
-        lcd.print(minutoInicial);
+        lcd.print("                    ");
         lcd.setCursor(0, 3);
-        lcd.print("Termina:");
-        lcd.setCursor(9,3);
-        lcd.print(horaFinal);
+        lcd.print("Se prende:");
         lcd.setCursor(11,3);
+        lcd.print(horaFinal);
+        lcd.setCursor(13,3);
         lcd.print(":");
-        lcd.setCursor(12,3);
+        lcd.setCursor(14,3);
         lcd.print(minutoInicial);
+        lcd.setCursor(17, 03);
+        lcd.print("hs.");
            
         if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial) {
         lcd.clear();
