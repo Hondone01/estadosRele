@@ -315,12 +315,16 @@ void loop() {
           lcd.print("0");
           lcd.setCursor(1, 3);
           lcd.print(posicionHora);
+          lcd.setCursor(4,3);
+          lcd.print("formato 24 hs!");
         } else if(posicionHora >= 10){
           lcd.setCursor(0,3);
           lcd.print(posicionHora);
+          lcd.setCursor(4,3);
+          lcd.print("formato 24 hs!");
         }   
         lcd.setCursor(2, 3);
-        lcd.print("                  ");
+        lcd.print("  ");
         if (digitalRead(pinEnt) == LOW) {
             horaInicial = posicionHora;
             Estado = 4;
@@ -351,12 +355,16 @@ void loop() {
           lcd.print("0");
           lcd.setCursor(1, 3);
           lcd.print(posicionMinuto);
+          lcd.setCursor(4,3);
+          lcd.print("formato 24 hs!");
         } else if(posicionMinuto >= 10){
           lcd.setCursor(0,3);
           lcd.print(posicionMinuto);
+          lcd.setCursor(4,3);
+          lcd.print("formato 24 hs!");
         }
         lcd.setCursor(2, 3);
-        lcd.print("                  ");   
+        lcd.print("  ");   
         if (digitalRead(pinEnt) == LOW) {
             minutoInicial = posicionMinuto;
             Estado = 5;
@@ -398,7 +406,7 @@ void loop() {
           lcd.print("hs");
         }   
         lcd.setCursor(0, 3);
-        lcd.print("Termina:");
+        lcd.print("Termina: ");
         if(horaFinal < 10){
           lcd.setCursor(9, 3);
           lcd.print("0");
@@ -416,12 +424,12 @@ void loop() {
           lcd.setCursor(13, 3);
           lcd.print(minutoInicial);
           lcd.setCursor(14,3);
-          lcd.print("hs");
+          lcd.print("hs  ");
         } else if(minutoInicial >= 10){
           lcd.setCursor(12,3);
           lcd.print(minutoInicial);
           lcd.setCursor(14,3);
-          lcd.print("hs");
+          lcd.print("hs  ");
         }   
 
         DateTime fecha = rtc.now();
