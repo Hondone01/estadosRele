@@ -17,8 +17,7 @@ RTC_DS3231 rtc; // crea objeto del tipo RTC_DS3231
 
 #define BUZZER_PASIVO 5
 
-//bool evento_inicio = true;
-//bool evento_fin = true;
+
 
 
 int Estado = 1;
@@ -43,10 +42,12 @@ int posicionHora = 0;
 int anteriorHora = 0;
 int posicionMinuto = 0;
 int anteriorMinuto = 0;
-int horaInicial = 0;
+int horaInicial;
 int minutoInicial = 0;
-//int minutoFinal = minutoInicial+2;
-int horaFinal = (horaInicial + 1) % 24;  // Maneja el overflow de la hora
+
+int horaFinal;
+
+
 // Configuración del display LCD
 const int en = 2, rw = 1, rs = 0, d4 = 4, d5 = 5, d6 = 6, d7 = 7, bl = 3;
 const int i2c_addr = 0x27;
@@ -55,7 +56,7 @@ LiquidCrystal_I2C lcd(i2c_addr, en, rw, rs, d4, d5, d6, d7, bl, POSITIVE);
 //////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
 bool sonido = true;
-bool clear = true;
+//bool clear = true;
 
 void encoder() {
     static unsigned long ultimaInterrupcion = 0;
@@ -295,6 +296,7 @@ void loop() {
 
     } else if (Estado == 3) {
         DateTime fecha = rtc.now();
+        
         if (posicionHora != anteriorHora) {
             anteriorHora = posicionHora;
         }
@@ -450,8 +452,107 @@ void loop() {
         }   
 
         DateTime fecha = rtc.now();
-        horaFinal = (horaInicial + 1) % 24;  // Maneja el overflow de la hora
+        switch (horaInicial) {
 
+          case 0:
+          horaFinal= 20;
+          break;
+
+          case 1:
+          horaFinal= 21;
+          break;
+
+          case 2:
+          horaFinal= 22;
+          break;
+
+          case 3:
+          horaFinal= 23;
+          break;
+          
+          case 4:
+          horaFinal= 0;
+          break;
+
+          case 5:
+          horaFinal= 1;
+          break;
+
+          case 6:
+          horaFinal= 2;
+          break;
+
+          case 7:
+          horaFinal= 3;
+          break;
+
+          case 8:
+          horaFinal= 4;
+          break;
+
+          case 9:
+          horaFinal= 5;
+          break;
+
+          case 10:
+          horaFinal= 6;
+          break;
+
+          case 11:
+          horaFinal= 7;
+          break;
+
+          case 12:
+          horaFinal= 8;
+          break;
+
+          case 13:
+          horaFinal= 9;
+          break;
+
+          case 14:
+          horaFinal= 10;
+          break;
+
+          case 15:
+          horaFinal= 11;
+          break;
+
+          case 16:
+          horaFinal= 12;
+          break;
+
+          case 17:
+          horaFinal= 13;
+          break;
+
+          case 18:
+          horaFinal= 14;
+          break;
+
+          case 19:
+          horaFinal= 15;
+          break;
+
+          case 20:
+          horaFinal= 16;
+          break;
+
+          case 21:
+          horaFinal= 17;
+          break;
+
+          case 22:
+          horaFinal= 18;
+          break;
+
+          case 23:
+          horaFinal= 19;
+          break;
+          
+        }
+        //horaFinal = (horaInicial + 20) % 24;  // Maneja el overflow de la hora
+       
         if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial){lcd.clear(); Estado = 6;} 
     }
 
