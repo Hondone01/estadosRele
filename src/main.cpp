@@ -47,6 +47,8 @@ int minutoInicial = 0;
 
 int horaFinal;
 
+//funcionalidad con millis para mostrar cartel emergente y cancelar el fotoperiodo seleccionado
+unsigned long tiempoInicio = 0;
 
 // Configuración del display LCD
 const int en = 2, rw = 1, rs = 0, d4 = 4, d5 = 5, d6 = 6, d7 = 7, bl = 3;
@@ -78,10 +80,10 @@ void encoder() {
         }
 
         POSICION = min(100, max(0, POSICION));
-        ultimaInterrupcion = tiempoInterrupcion;
+       // ultimaInterrupcion = tiempoInterrupcion;
 
         posicionHora = min(37, max(-1, posicionHora));
-        ultimaInterrupcion = tiempoInterrupcion;
+       // ultimaInterrupcion = tiempoInterrupcion;
 
         posicionMinuto = min(61, max(0, posicionMinuto));
         ultimaInterrupcion = tiempoInterrupcion;
@@ -93,6 +95,8 @@ void encoder() {
 
 void setup() {
     Serial.begin(9600);
+ // static unsigned long tiempo1 = 0;
+  
 
     pinMode(BUZZER_PASIVO, OUTPUT);
     pinMode(RELE, OUTPUT);
@@ -149,7 +153,7 @@ void loop() {
  // DateTime fecha = rtc.now();
  // if(reloj-muestraReloj >= 60000)
     if (Estado == 1) {
-
+        delay(1000);
         if (POSICION != ANTERIOR) {
             ANTERIOR = POSICION;
         }
@@ -391,8 +395,13 @@ void loop() {
         }
 
     } else if (Estado == 5) {
-        //bool evento_inicio = true;
-       // bool evento_fin = true;
+      // tiempo = 0;
+     
+
+       if (millis() - tiempoInicio > 30000){
+        tiempoInicio = millis();
+        Estado = 8;
+       }
 
         lcd.setCursor(0, 0);
         lcd.print(" 20HS-ON / 04HS-OFF ");
@@ -551,9 +560,13 @@ void loop() {
           break;
           
         }
-        //horaFinal = (horaInicial + 20) % 24;  // Maneja el overflow de la hora
        
         if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial){lcd.clear(); Estado = 6;} 
+        if (millis() - tiempoInicio > 3000 && digitalRead(pinEnt) == LOW ){
+          tiempoInicio = millis();
+          POSICION = 1;
+          Estado = 1;
+         }
     }
 
     else if (Estado == 6) {
@@ -640,6 +653,22 @@ void loop() {
         lcd.clear();
         Estado = 6;
         }
-    }
-    
+    } else if (Estado == 8) {
+
+        lcd.setCursor(0, 0);
+        lcd.print(" Presiona durante 3 ");
+        lcd.setCursor(0, 1);
+        lcd.print(" segundos el boton  ");
+        lcd.setCursor(0, 2);
+        lcd.print(" para cancelar e ir ");
+        lcd.setCursor(0, 3);
+        lcd.print(" al menu principal  ");
+
+        if (millis() - tiempoInicio > 3000){
+          tiempoInicio = millis();
+          lcd.clear();
+          Estado = 5;
+         }
+      } 
 }
+    
