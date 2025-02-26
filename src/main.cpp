@@ -17,7 +17,9 @@ RTC_DS3231 rtc; // crea objeto del tipo RTC_DS3231
 
 #define BUZZER_PASIVO 5
 
-
+int B = 3;
+int A = 2;
+int pinEnt = 4;
 
 
 int Estado = 1;
@@ -31,12 +33,8 @@ int duraciones2[] = { 1, 1 };
 
 #define RELE 6
 
-// Declaración del encoder rotativo
-int pinEnt = 4;
-int B = 3;
-int A = 2;
 
-int ANTERIOR = 4;
+volatile int ANTERIOR = 4;
 int POSICION = 1;
 int posicionHora = 0;
 int anteriorHora = 0;
@@ -65,7 +63,7 @@ void encoder() {
 
     unsigned long tiempoInterrupcion = millis();
 
-    if (tiempoInterrupcion - ultimaInterrupcion > 100) {
+    if (tiempoInterrupcion - ultimaInterrupcion > 5) {
         if (digitalRead(B) == HIGH) {
             sonido = true;
             POSICION++;
@@ -94,6 +92,9 @@ void encoder() {
 ///////////////////////////////////////////////////////////////////////////////////
 
 void setup() {
+
+  // Declaración del encoder rotativo
+  
     Serial.begin(9600);
  // static unsigned long tiempo1 = 0;
   
@@ -150,10 +151,9 @@ void tresPitidos() {
 ////////////////////////////////////////////////////////////////////////////////////
 
 void loop() {
- // DateTime fecha = rtc.now();
- // if(reloj-muestraReloj >= 60000)
+ 
     if (Estado == 1) {
-        delay(1000);
+        
         if (POSICION != ANTERIOR) {
             ANTERIOR = POSICION;
         }
@@ -315,12 +315,26 @@ void loop() {
         lcd.print("Hora actual:");
         lcd.setCursor(12,0);
         lcd.print(" ");
-        lcd.setCursor(13,0);
-        lcd.print(fecha.hour());
+        if(fecha.hour() < 10){
+          lcd.setCursor(13, 0);
+          lcd.print("0");
+          lcd.setCursor(14, 0);
+          lcd.print(fecha.hour());
+        } else if(fecha.hour() >= 10){
+          lcd.setCursor(13,0);
+          lcd.print(fecha.hour());
+        }
         lcd.setCursor(15,0);
         lcd.print(":");
-        lcd.setCursor(16,0);
-        lcd.print(fecha.minute());
+        if(fecha.minute() < 10){
+          lcd.setCursor(16, 0);
+          lcd.print("0");
+          lcd.setCursor(17, 0);
+          lcd.print(fecha.minute());
+        } else if(fecha.minute() >= 10){
+          lcd.setCursor(16,0);
+          lcd.print(fecha.minute());
+        }
         lcd.setCursor(0, 1);
         lcd.print("   ELIGE LA HORA    ");
         lcd.setCursor(0, 2);
@@ -359,16 +373,31 @@ void loop() {
         } 
 
         //int minutoInicial = 0;
-          lcd.setCursor(0, 0);
-          lcd.print("Hora actual:");
-          lcd.setCursor(12,0);
-          lcd.print(" ");
+        lcd.setCursor(0, 0);
+        lcd.print("Hora actual:");
+        lcd.setCursor(12,0);
+        lcd.print(" ");
+        if(fecha.hour() < 10){
+          lcd.setCursor(13, 0);
+          lcd.print("0");
+          lcd.setCursor(14, 0);
+          lcd.print(fecha.hour());
+        } else if(fecha.hour() >= 10){
           lcd.setCursor(13,0);
           lcd.print(fecha.hour());
-          lcd.setCursor(15,0);
-          lcd.print(":");
+        }
+        lcd.setCursor(15,0);
+        lcd.print(":");
+        if(fecha.minute() < 10){
+          lcd.setCursor(16, 0);
+          lcd.print("0");
+          lcd.setCursor(17, 0);
+          lcd.print(fecha.minute());
+        } else if(fecha.minute() >= 10){
           lcd.setCursor(16,0);
           lcd.print(fecha.minute());
+        }
+
           lcd.setCursor(0, 1);
           lcd.print(" ELIGE LOS MINUTOS  ");
           lcd.setCursor(0, 2);
@@ -564,8 +593,10 @@ void loop() {
         if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial){lcd.clear(); Estado = 6;} 
         if (millis() - tiempoInicio > 3000 && digitalRead(pinEnt) == LOW ){
           tiempoInicio = millis();
+         // posicionEstadoAnterior = 5;
           POSICION = 1;
-          Estado = 1;
+          Estado = 0;
+          
          }
     }
 
@@ -669,6 +700,17 @@ void loop() {
           lcd.clear();
           Estado = 5;
          }
-      } 
+    } else if (Estado == 0) {
+      lcd.setCursor(0, 0);
+      lcd.print("----FOTOPERIODOS----");
+      lcd.setCursor(0, 1);
+      lcd.print(" > 20HS.ON-04HS.OFF ");
+      lcd.setCursor(0, 2);
+      lcd.print("   18HS.ON-06HS.OFF ");
+      lcd.setCursor(0, 3);
+      lcd.print("   12HS.ON-12HS.OFF ");
+      delay(500);
+      Estado = 1;
+    }
 }
     
