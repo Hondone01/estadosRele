@@ -536,6 +536,11 @@ void loop() {
 
     else if (Estado == 6) {
         DateTime fecha = rtc.now();
+
+        if (millis() - tiempoInicio > 30000) {
+          tiempoInicio = millis();
+          Estado = 9;
+        }
      
 
         digitalWrite(RELE, HIGH);
@@ -576,9 +581,36 @@ void loop() {
             lcd.clear();
             Estado = 7;
         }
+        if (digitalRead(pinEnt) == LOW) {
+          if (millis() - tiempoInicio >= 3000) {
+            tiempoInicio = millis(); // Reiniciar el tiempo
+            POSICION = 1;
+            Estado = 0;
+          }
+        } else {
+          // Si el botón no está presionado, reiniciar el tiempo
+          tiempoInicio = millis();
+        }
+
     } else if (Estado == 7) {
         DateTime fecha = rtc.now();
         digitalWrite(RELE, LOW);
+
+        if (millis() - tiempoInicio > 30000) {
+          tiempoInicio = millis();
+          Estado = 10;
+        }
+
+
+
+
+
+
+
+
+
+
+
 
         lcd.setCursor(0, 0);
         lcd.print("    LA LUZ ESTA     ");
@@ -617,6 +649,28 @@ void loop() {
         lcd.clear();
         Estado = 6;
         }
+
+        if (digitalRead(pinEnt) == LOW) {
+          if (millis() - tiempoInicio >= 3000) {
+            tiempoInicio = millis(); // Reiniciar el tiempo
+            POSICION = 1;
+            Estado = 0;
+          }
+        } else {
+          // Si el botón no está presionado, reiniciar el tiempo
+          tiempoInicio = millis();
+        }
+
+
+
+
+
+
+
+
+
+
+
     } else if (Estado == 8) {
 
         lcd.setCursor(0, 0);
@@ -650,7 +704,40 @@ void loop() {
       lcd.print("1");
       delay(800);
       digitalWrite(RELE, LOW);
+      tresPitidos();
       Estado = 1;
+    } else if (Estado == 9) {
+
+      lcd.setCursor(0, 0);
+      lcd.print(" Presiona durante 3 ");
+      lcd.setCursor(0, 1);
+      lcd.print(" segundos el boton  ");
+      lcd.setCursor(0, 2);
+      lcd.print(" para cancelar e ir ");
+      lcd.setCursor(0, 3);
+      lcd.print(" al menu principal  ");
+
+      if (millis() - tiempoInicio > 3000){
+        tiempoInicio = millis();
+        lcd.clear();
+        Estado = 6;
+       }
+    } else if (Estado == 10) {
+
+      lcd.setCursor(0, 0);
+      lcd.print(" Presiona durante 3 ");
+      lcd.setCursor(0, 1);
+      lcd.print(" segundos el boton  ");
+      lcd.setCursor(0, 2);
+      lcd.print(" para cancelar e ir ");
+      lcd.setCursor(0, 3);
+      lcd.print(" al menu principal  ");
+
+      if (millis() - tiempoInicio > 3000){
+        tiempoInicio = millis();
+        lcd.clear();
+        Estado = 7;
+       }
     }
 }
     
