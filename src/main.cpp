@@ -45,6 +45,19 @@ int minutoInicial = 0;
 
 int horaFinal;
 
+//funcionalidad para activar o desactivar el fotoperiodo en el caso de que se cumpla la hora de activacion
+//o desactivacion cuando el loop del programa esta en Estado 8 mostrando el mensaje
+bool enciendeFotoUno = false;
+bool enciendeFotoDos = false;
+bool enciendeFotoTres = false;
+bool enciendeFotoCuatro = false;
+bool enciendeFotoCinco = false;
+bool apagaFotoUno = false;
+bool apagaFotoDos = false;
+bool apagaFotoTres = false;
+bool apagaFotoCuatro = false;
+bool apagaFotoCinco = false;
+
 //funcionalidad con millis para mostrar cartel emergente y cancelar el fotoperiodo seleccionado
 bool vuelveEstadoCinco = false;
 bool vuelveEstadoSeis = false;
@@ -442,8 +455,9 @@ void loop() {
 
     } else if (Estado == 5) {
       // Control de tiempo para cambiar de estado
-      vuelveEstadoCinco = true;
-      mensajeCancelar();
+      enciendeFotoUno = true; //para que prenda la luz si es la hora y se encuentra en el mensaje cancelar
+      vuelveEstadoCinco = true;//para que vuelva a la espera del ciclo elegido mostrando el mensaje foto activado
+      mensajeCancelar(); //espera 30 segundos que se reinicia y va al mensaje cancelar durante 4 segundos despues vuelve
 
       lcd.setCursor(0, 0);
       lcd.print(" 20HS-ON / 04HS-OFF ");
@@ -532,7 +546,7 @@ void loop() {
     
       if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial) {
         lcd.clear();
-        vuelveEstadoCinco = false;
+        vuelveEstadoCinco = false; //lo pone en falso ya que sale de la espera del ciclo y se va al estado dnd prende luz
         Estado = 6;
       }
     
@@ -541,7 +555,7 @@ void loop() {
         if (millis() - tiempoInicio >= 3000) {
           tiempoInicio = millis(); // Reiniciar el tiempo
           POSICION = 1;
-          vuelveEstadoCinco = false;
+          vuelveEstadoCinco = false;// Como se va al menu principal pone en falso la vuelta al estado donde muestra mensaje activado
           Estado = 0;
         }
       } else {
@@ -553,8 +567,8 @@ void loop() {
 
     else if (Estado == 6) {
         DateTime fecha = rtc.now();
-
-        vuelveEstadoSeis = true;
+        //enciendeFotoUno = true;
+        vuelveEstadoSeis = true; // activa la vuelta al estado de luz prendida para mostrar el mensaje de cancelar
         mensajeCancelar();
 
         digitalWrite(RELE, HIGH);
@@ -593,14 +607,19 @@ void loop() {
 
         if (fecha.hour() == horaFinal && fecha.minute() == minutoInicial) {
             lcd.clear();
-            vuelveEstadoSeis = false;
+            vuelveEstadoSeis = false;//pone en falso la vuelta al estado seis ya que se va del estado luz prendida
+            enciendeFotoUno = false;//pone en falso el encendido del ciclo en el caso de que se este mostrando el mensaje cancelar ya que pasa al estado de luz apagada
+            apagaFotoUno = true;//activa el apagado de la luz para el mensaje cancelar ya que va al estado de luz apagada
             Estado = 7;
         }
         if (digitalRead(pinEnt) == LOW) {
           if (millis() - tiempoInicio >= 3000) {
             tiempoInicio = millis(); // Reiniciar el tiempo
             POSICION = 1;
+            //deja todos los booleanos apagados ya que se va al mensaje de cancelando y luego al menu inicial
             vuelveEstadoSeis = false;
+            enciendeFotoUno = false;
+            apagaFotoUno = false;
             Estado = 0;
           }
         } else {
@@ -668,6 +687,23 @@ void loop() {
 
 
     } else if (Estado == 8) {
+      DateTime fecha = rtc.now();
+
+        if (enciendeFotoUno == true){
+          if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial) {
+            lcd.clear();
+            vuelveEstadoCinco = false;
+            Estado = 6;
+          }
+        } else if (apagaFotoUno == true){
+          if (fecha.hour() == horaFinal && fecha.minute() == minutoInicial) {
+            lcd.clear();
+            vuelveEstadoSeis = false;
+           // enciendeFotoUno = false;
+           // apagaFotoUno = false;
+            Estado = 7;
+         }
+        }
 
         lcd.setCursor(0, 0);
         lcd.print(" Presiona durante 3 ");
@@ -678,11 +714,21 @@ void loop() {
         lcd.setCursor(0, 3);
         lcd.print(" al menu principal  ");
 
-        if (millis() - tiempoInicio > 4000){
+        if (millis() - tiempoInicio > 4000 && vuelveEstadoCinco == true){
           tiempoInicio = millis();
           lcd.clear();
           Estado = 5;
+         } else if (millis() - tiempoInicio > 4000 && vuelveEstadoSeis == true){
+          tiempoInicio = millis();
+          lcd.clear();
+          Estado = 6;
+         } else if (millis() - tiempoInicio > 4000 && vuelveEstadoSiete == true){
+          tiempoInicio = millis();
+          lcd.clear();
+          Estado = 7;
          }
+
+
     } else if (Estado == 0) {
       lcd.setCursor(0, 0);
       lcd.print("                    ");
