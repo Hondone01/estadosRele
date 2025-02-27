@@ -46,6 +46,9 @@ int minutoInicial = 0;
 int horaFinal;
 
 //funcionalidad con millis para mostrar cartel emergente y cancelar el fotoperiodo seleccionado
+bool vuelveEstadoCinco = false;
+bool vuelveEstadoSeis = false;
+bool vuelveEstadoSiete = false;
 unsigned long tiempoInicio = 0;
 unsigned long segundos = 0;
 int second = 0;
@@ -59,16 +62,16 @@ LiquidCrystal_I2C lcd(i2c_addr, en, rw, rs, d4, d5, d6, d7, bl, POSITIVE);
 bool sonido = true;
 //bool clear = true;
 
-void mensaje(){
+void mensajeCancelar(){
   if(millis() >= segundos + 1000){
     segundos = millis();
     second++;
     if(second == 31){
       second = 0;
     }
-    if(second == 30){
-      Estado = 8;
-    }
+    if(second == 30 && vuelveEstadoCinco == true) Estado = 8;
+     else if(second == 30 && vuelveEstadoSeis == true) Estado = 8;
+      else if(second == 30 && vuelveEstadoSiete == true) Estado = 8;
   }
 }
 
@@ -439,18 +442,9 @@ void loop() {
 
     } else if (Estado == 5) {
       // Control de tiempo para cambiar de estado
-      mensaje();
+      vuelveEstadoCinco = true;
+      mensajeCancelar();
 
-
-
-
-
-
-
-
-
-      
-    
       lcd.setCursor(0, 0);
       lcd.print(" 20HS-ON / 04HS-OFF ");
       lcd.setCursor(0, 1);
@@ -538,6 +532,7 @@ void loop() {
     
       if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial) {
         lcd.clear();
+        vuelveEstadoCinco = false;
         Estado = 6;
       }
     
@@ -546,6 +541,7 @@ void loop() {
         if (millis() - tiempoInicio >= 3000) {
           tiempoInicio = millis(); // Reiniciar el tiempo
           POSICION = 1;
+          vuelveEstadoCinco = false;
           Estado = 0;
         }
       } else {
@@ -558,11 +554,8 @@ void loop() {
     else if (Estado == 6) {
         DateTime fecha = rtc.now();
 
-        if (millis() - tiempoInicio > 30000) {
-          tiempoInicio = millis();
-          Estado = 9;
-        }
-     
+        vuelveEstadoSeis = true;
+        mensajeCancelar();
 
         digitalWrite(RELE, HIGH);
         lcd.setCursor(0, 0);
@@ -600,12 +593,14 @@ void loop() {
 
         if (fecha.hour() == horaFinal && fecha.minute() == minutoInicial) {
             lcd.clear();
+            vuelveEstadoSeis = false;
             Estado = 7;
         }
         if (digitalRead(pinEnt) == LOW) {
           if (millis() - tiempoInicio >= 3000) {
             tiempoInicio = millis(); // Reiniciar el tiempo
             POSICION = 1;
+            vuelveEstadoSeis = false;
             Estado = 0;
           }
         } else {
@@ -617,10 +612,8 @@ void loop() {
         DateTime fecha = rtc.now();
         digitalWrite(RELE, LOW);
 
-        if (millis() - tiempoInicio > 30000) {
-          tiempoInicio = millis();
-          Estado = 10;
-        }
+        vuelveEstadoSiete = true;
+        mensajeCancelar();
 
         lcd.setCursor(0, 0);
         lcd.print("    LA LUZ ESTA     ");
@@ -657,6 +650,7 @@ void loop() {
            
         if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial) {
         lcd.clear();
+        vuelveEstadoSiete = false;
         Estado = 6;
         }
 
@@ -664,6 +658,7 @@ void loop() {
           if (millis() - tiempoInicio >= 3000) {
             tiempoInicio = millis(); // Reiniciar el tiempo
             POSICION = 1;
+            vuelveEstadoSiete = false;
             Estado = 0;
           }
         } else {
@@ -683,7 +678,7 @@ void loop() {
         lcd.setCursor(0, 3);
         lcd.print(" al menu principal  ");
 
-        if (millis() - tiempoInicio > 3000){
+        if (millis() - tiempoInicio > 4000){
           tiempoInicio = millis();
           lcd.clear();
           Estado = 5;
