@@ -46,7 +46,7 @@ int minutoInicial = 0;
 int horaFinal;
 
 //funcionalidad para activar o desactivar el fotoperiodo en el caso de que se cumpla la hora de activacion
-//o desactivacion cuando el loop del programa esta en Estado 8 mostrando el mensaje
+//o desactivacion cuando el loop del programa esta en Estado 8 mostrando el mensaje presiona boton para cancelar
 bool enciendeFotoUno = false;
 bool enciendeFotoDos = false;
 bool enciendeFotoTres = false;
@@ -227,7 +227,12 @@ void loop() {
                     unPitido();
                     sonido = false;
                 }
-                break;
+                if (digitalRead(pinEnt) == LOW) {
+                  dosPitidos();
+                  Estado = 9;
+                  delay(500);
+              }
+              break;
 
             case 3:
                 lcd.setCursor(0, 0);
@@ -727,8 +732,57 @@ void loop() {
           lcd.clear();
           Estado = 7;
          }
+    } else if (Estado == 9){
+      if (POSICION != ANTERIOR) {
+        ANTERIOR = POSICION;
+    }
+    if (POSICION > 2) {
+        POSICION = 1;
+    } else if (POSICION < 1) {
+        POSICION = 2;
+    }
 
+    switch (POSICION) {
+        case 1:
+            lcd.setCursor(0, 0);
+            lcd.print(" CAMBIAR            ");
+            lcd.setCursor(0, 1);
+            lcd.print(" 04HS APAGADO       ");
+            lcd.setCursor(0, 2);
+            lcd.print("                    ");
+            lcd.setCursor(0, 3);
+            lcd.print("  INICIAR           ");
+            if (sonido == true) {
+                unPitido();
+                sonido = false;
+            }
+            if (digitalRead(pinEnt) == LOW) {
+                Estado = 3;
+                delay(500);
+            }
+            break;
 
+        case 2:
+            lcd.setCursor(0, 0);
+            lcd.print(" CAMBIAR            ");
+            lcd.setCursor(0, 1);
+            lcd.print(" 04HS APAGADO       ");
+            lcd.setCursor(0, 2);
+            lcd.print("                    ");
+            lcd.setCursor(0, 3);
+            lcd.print("  VOLVER            ");
+            if (sonido == true) {
+                unPitido();
+                sonido = false;
+            }
+            if (digitalRead(pinEnt) == LOW) {
+                POSICION = 1;
+                Estado = 1;
+                delay(500);
+            }
+            break;
+          }
+          
     } else if (Estado == 0) {
       lcd.setCursor(0, 0);
       lcd.print("                    ");
@@ -748,38 +802,8 @@ void loop() {
       digitalWrite(RELE, LOW);
       tresPitidos();
       Estado = 1;
-    } else if (Estado == 9) {
-
-      lcd.setCursor(0, 0);
-      lcd.print(" Presiona durante 3 ");
-      lcd.setCursor(0, 1);
-      lcd.print(" segundos el boton  ");
-      lcd.setCursor(0, 2);
-      lcd.print(" para cancelar e ir ");
-      lcd.setCursor(0, 3);
-      lcd.print(" al menu principal  ");
-
-      if (millis() - tiempoInicio > 3000){
-        tiempoInicio = millis();
-        lcd.clear();
-        Estado = 6;
-       }
-    } else if (Estado == 10) {
-
-      lcd.setCursor(0, 0);
-      lcd.print(" Presiona durante 3 ");
-      lcd.setCursor(0, 1);
-      lcd.print(" segundos el boton  ");
-      lcd.setCursor(0, 2);
-      lcd.print(" para cancelar e ir ");
-      lcd.setCursor(0, 3);
-      lcd.print(" al menu principal  ");
-
-      if (millis() - tiempoInicio > 3000){
-        tiempoInicio = millis();
-        lcd.clear();
-        Estado = 7;
-       }
-    }
+    } 
 }
+    
+      
     
