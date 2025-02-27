@@ -47,7 +47,8 @@ int horaFinal;
 
 //funcionalidad con millis para mostrar cartel emergente y cancelar el fotoperiodo seleccionado
 unsigned long tiempoInicio = 0;
-
+unsigned long segundos = 0;
+int second = 0;
 // Configuración del display LCD
 const int en = 2, rw = 1, rs = 0, d4 = 4, d5 = 5, d6 = 6, d7 = 7, bl = 3;
 const int i2c_addr = 0x27;
@@ -57,6 +58,19 @@ LiquidCrystal_I2C lcd(i2c_addr, en, rw, rs, d4, d5, d6, d7, bl, POSITIVE);
 ////////////////////////////////////////////////////////////////////////////////////////
 bool sonido = true;
 //bool clear = true;
+
+void mensaje(){
+  if(millis() >= segundos + 1000){
+    segundos = millis();
+    second++;
+    if(second == 31){
+      second = 0;
+    }
+    if(second == 30){
+      Estado = 8;
+    }
+  }
+}
 
 void encoder() {
     static unsigned long ultimaInterrupcion = 0;
@@ -425,10 +439,17 @@ void loop() {
 
     } else if (Estado == 5) {
       // Control de tiempo para cambiar de estado
-      if (millis() - tiempoInicio > 30000) {
-        tiempoInicio = millis();
-        Estado = 8;
-      }
+      mensaje();
+
+
+
+
+
+
+
+
+
+      
     
       lcd.setCursor(0, 0);
       lcd.print(" 20HS-ON / 04HS-OFF ");
@@ -601,17 +622,6 @@ void loop() {
           Estado = 10;
         }
 
-
-
-
-
-
-
-
-
-
-
-
         lcd.setCursor(0, 0);
         lcd.print("    LA LUZ ESTA     ");
         lcd.setCursor(0, 1);
@@ -660,15 +670,6 @@ void loop() {
           // Si el botón no está presionado, reiniciar el tiempo
           tiempoInicio = millis();
         }
-
-
-
-
-
-
-
-
-
 
 
     } else if (Estado == 8) {
