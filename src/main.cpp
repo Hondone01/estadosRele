@@ -17,9 +17,14 @@ RTC_DS3231 rtc; // crea objeto del tipo RTC_DS3231
 
 #define BUZZER_PASIVO 5
 
-int B = 3;
-int A = 2;
-int pinEnt = 4;
+int A = 2; //DT
+int B = 4; //CLK
+
+int pinEnt = 7;
+
+int ANTERIOR = 4;
+
+volatile int POSICION = 1;
 
 
 int Estado = 1;
@@ -34,8 +39,7 @@ int duraciones2[] = { 1, 1 };
 #define RELE 6
 
 
-volatile int ANTERIOR = 4;
-int POSICION = 1;
+
 int posicionHora = 0;
 int anteriorHora = 0;
 int posicionMinuto = 0;
@@ -62,6 +66,11 @@ bool apagaFotoCinco = false;
 bool vuelveEstadoCinco = false;
 bool vuelveEstadoSeis = false;
 bool vuelveEstadoSiete = false;
+bool vuelveEstadoDoce = false;
+bool vuelveEstadoTrece = false;
+bool vuelveEstadoCatorce = false;
+
+
 unsigned long tiempoInicio = 0;
 unsigned long segundos = 0;
 int second = 0;
@@ -84,7 +93,10 @@ void mensajeCancelar(){
     }
     if(second == 30 && vuelveEstadoCinco == true) Estado = 8;
      else if(second == 30 && vuelveEstadoSeis == true) Estado = 8;
-      else if(second == 30 && vuelveEstadoSiete == true) Estado = 8;
+     else if(second == 30 && vuelveEstadoSiete == true) Estado = 8;
+     else if(second == 30 && vuelveEstadoDoce == true) Estado = 8;
+     else if(second == 30 && vuelveEstadoTrece == true) Estado = 8;
+     else if(second == 30 && vuelveEstadoCatorce == true) Estado = 8;
   }
 }
 
@@ -108,10 +120,10 @@ void encoder() {
         }
 
         POSICION = min(100, max(0, POSICION));
-       // ultimaInterrupcion = tiempoInterrupcion;
+        ultimaInterrupcion = tiempoInterrupcion;
 
         posicionHora = min(37, max(-1, posicionHora));
-       // ultimaInterrupcion = tiempoInterrupcion;
+        ultimaInterrupcion = tiempoInterrupcion;
 
         posicionMinuto = min(61, max(0, posicionMinuto));
         ultimaInterrupcion = tiempoInterrupcion;
@@ -124,19 +136,17 @@ void encoder() {
 void setup() {
 
   // Declaración del encoder rotativo
-  
-    Serial.begin(9600);
- // static unsigned long tiempo1 = 0;
-  
-
-    pinMode(BUZZER_PASIVO, OUTPUT);
-    pinMode(RELE, OUTPUT);
     pinMode(A, INPUT); // A como entrada
     pinMode(B, INPUT); // B como entrada
     pinMode(pinEnt, INPUT); // pinEnt como entrada
 
-    attachInterrupt(digitalPinToInterrupt(A), encoder, LOW); // Interrupción sobre pin A
+    Serial.begin(9600);
+ 
+ attachInterrupt(digitalPinToInterrupt(A), encoder, LOW); // Interrupción sobre pin A
 
+    pinMode(BUZZER_PASIVO, OUTPUT);
+    pinMode(RELE, OUTPUT);
+    
     lcd.begin(20, 4); // Setea display 20 caracteres, 4 renglones
     lcd.clear(); // Borra contenido del display
 
@@ -176,13 +186,16 @@ void tresPitidos() {
         noTone(BUZZER_PASIVO);
     }
 }
-
-////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
 void loop() {
  
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 1         ////////////////////////////
+
+
     if (Estado == 1) {
+      
         
         if (POSICION != ANTERIOR) {
             ANTERIOR = POSICION;
@@ -230,6 +243,7 @@ void loop() {
                 if (digitalRead(pinEnt) == LOW) {
                   dosPitidos();
                   Estado = 9;
+                  POSICION = 1;
                   delay(500);
               }
               break;
@@ -279,6 +293,8 @@ void loop() {
                 }
                 break;
         }
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 2         ////////////////////////////   
 
     } else if (Estado == 2) {
 
@@ -332,6 +348,9 @@ void loop() {
                 break;
 
         }
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 3         ////////////////////////////        
 
     } else if (Estado == 3) {
         DateTime fecha = rtc.now();
@@ -396,6 +415,9 @@ void loop() {
             delay(500);
         }
 
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 4         ////////////////////////////        
+
     } else if (Estado == 4) {
         DateTime fecha = rtc.now();
         if (posicionMinuto != anteriorMinuto) {
@@ -458,14 +480,18 @@ void loop() {
             delay(500);
         }
 
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 5         ////////////////////////////        
+
     } else if (Estado == 5) {
+      DateTime fecha = rtc.now();
       // Control de tiempo para cambiar de estado
       enciendeFotoUno = true; //para que prenda la luz si es la hora y se encuentra en el mensaje cancelar
       vuelveEstadoCinco = true;//para que vuelva a la espera del ciclo elegido mostrando el mensaje foto activado
       mensajeCancelar(); //espera 30 segundos que se reinicia y va al mensaje cancelar durante 4 segundos despues vuelve
 
       lcd.setCursor(0, 0);
-      lcd.print(" 20HS-ON / 04HS-OFF ");
+      lcd.print("  20HS.ON-04HS.OFF  ");
       lcd.setCursor(0, 1);
       lcd.print("      ACTIVADO!     ");
       lcd.setCursor(0, 2);
@@ -520,9 +546,8 @@ void loop() {
         lcd.setCursor(14, 3);
         lcd.print("hs  ");
       }
-    
-      DateTime fecha = rtc.now();
-      switch (horaInicial) {
+      
+        switch (horaInicial) {
         case 0: horaFinal = 20; break;
         case 1: horaFinal = 21; break;
         case 2: horaFinal = 22; break;
@@ -569,10 +594,12 @@ void loop() {
       }
     }
     
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 6         ////////////////////////////
 
     else if (Estado == 6) {
         DateTime fecha = rtc.now();
-        //enciendeFotoUno = true;
+        enciendeFotoUno = true;
         vuelveEstadoSeis = true; // activa la vuelta al estado de luz prendida para mostrar el mensaje de cancelar
         mensajeCancelar();
 
@@ -602,12 +629,12 @@ void loop() {
           lcd.setCursor(14, 3);
           lcd.print(minutoInicial);
           lcd.setCursor(15,3);
-          lcd.print("hs");
+          lcd.print("hs ");
         } else if(minutoInicial >= 10){
           lcd.setCursor(13,3);
           lcd.print(minutoInicial);
           lcd.setCursor(15,3);
-          lcd.print("hs");
+          lcd.print("hs ");
         }   
 
         if (fecha.hour() == horaFinal && fecha.minute() == minutoInicial) {
@@ -632,11 +659,533 @@ void loop() {
           tiempoInicio = millis();
         }
 
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 7         ////////////////////////////        
+
     } else if (Estado == 7) {
         DateTime fecha = rtc.now();
         digitalWrite(RELE, LOW);
 
         vuelveEstadoSiete = true;
+        mensajeCancelar();
+
+        lcd.setCursor(0, 0);
+        lcd.print("    LA LUZ ESTA     ");
+        lcd.setCursor(0, 1);
+        lcd.print("     APAGADA!       ");
+        lcd.setCursor(0, 2);
+        lcd.print("                    ");
+        lcd.setCursor(0, 3);
+        lcd.print("Se prende:");
+        if(horaInicial < 10){
+          lcd.setCursor(11, 3);
+          lcd.print("0");
+          lcd.setCursor(12, 3);
+          lcd.print(horaInicial);
+        } else if(horaInicial >= 10){
+          lcd.setCursor(11,3);
+          lcd.print(horaInicial);
+        }   
+        lcd.setCursor(13,3);
+        lcd.print(":");
+        if(minutoInicial < 10){
+          lcd.setCursor(14, 3);
+          lcd.print("0");
+          lcd.setCursor(15, 3);
+          lcd.print(minutoInicial);
+          lcd.setCursor(16,3);
+          lcd.print("hs ");
+        } else if(minutoInicial >= 10){
+          lcd.setCursor(14,3);
+          lcd.print(minutoInicial);
+          lcd.setCursor(16,3);
+          lcd.print("hs ");
+        }   
+           
+        if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial) {
+        lcd.clear();
+        vuelveEstadoSiete = false;
+        Estado = 6;
+        }
+
+        if (digitalRead(pinEnt) == LOW) {
+          if (millis() - tiempoInicio >= 3000) {
+            tiempoInicio = millis(); // Reiniciar el tiempo
+            POSICION = 1;
+            vuelveEstadoSiete = false;
+            Estado = 0;
+          }
+        } else {
+          // Si el botón no está presionado, reiniciar el tiempo
+          tiempoInicio = millis();
+        }
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 8         ////////////////////////////        
+
+    } else if (Estado == 8) {
+      DateTime fecha = rtc.now();
+
+        if (enciendeFotoUno == true){
+          if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial) {
+            lcd.clear();
+            vuelveEstadoCinco = false;
+            Estado = 6;
+          }
+        } else if (apagaFotoUno == true){
+          if (fecha.hour() == horaFinal && fecha.minute() == minutoInicial) {
+            lcd.clear();
+            vuelveEstadoSeis = false;
+           // enciendeFotoUno = false;
+           // apagaFotoUno = false;
+            Estado = 7;
+         }
+        } else if (enciendeFotoDos == true){
+          if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial) {
+            lcd.clear();
+            vuelveEstadoDoce = false;
+            Estado = 13;
+          }
+        } else if (apagaFotoDos == true){
+          if (fecha.hour() == horaFinal && fecha.minute() == minutoInicial) {
+            lcd.clear();
+            vuelveEstadoTrece = false;
+           // enciendeFotoUno = false;
+           // apagaFotoUno = false;
+            Estado = 14;
+         }
+        }
+
+        lcd.setCursor(0, 0);
+        lcd.print(" Presiona durante 3 ");
+        lcd.setCursor(0, 1);
+        lcd.print(" segundos el boton  ");
+        lcd.setCursor(0, 2);
+        lcd.print(" para cancelar e ir ");
+        lcd.setCursor(0, 3);
+        lcd.print(" al menu principal  ");
+
+        if (millis() - tiempoInicio > 4000 && vuelveEstadoCinco == true){
+          tiempoInicio = millis();
+          lcd.clear();
+          Estado = 5;
+         } else if (millis() - tiempoInicio > 4000 && vuelveEstadoSeis == true){
+          tiempoInicio = millis();
+          lcd.clear();
+          Estado = 6;
+         } else if (millis() - tiempoInicio > 4000 && vuelveEstadoSiete == true){
+          tiempoInicio = millis();
+          lcd.clear();
+          Estado = 7;
+         } else if (millis() - tiempoInicio > 4000 && vuelveEstadoDoce == true){
+          tiempoInicio = millis();
+          lcd.clear();
+          Estado = 12;
+         } else if (millis() - tiempoInicio > 4000 && vuelveEstadoTrece == true){
+          tiempoInicio = millis();
+          lcd.clear();
+          Estado = 13;
+         } else if (millis() - tiempoInicio > 4000 && vuelveEstadoCatorce == true){
+          tiempoInicio = millis();
+          lcd.clear();
+          Estado = 14;
+         }
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 9         ////////////////////////////       
+
+    } else if (Estado == 9){
+      if (POSICION != ANTERIOR) {
+        ANTERIOR = POSICION;
+    }
+    if (POSICION > 2) {
+        POSICION = 1;
+    } else if (POSICION < 1) {
+        POSICION = 2;
+    }
+
+
+    switch (POSICION) {
+        case 1:
+            lcd.setCursor(0, 0);
+            lcd.print(" 18HS PRENDIDO      ");
+            lcd.setCursor(0, 1);
+            lcd.print(" 06HS APAGADO       ");
+            lcd.setCursor(0, 2);
+            lcd.print("                    ");
+            lcd.setCursor(0, 3);
+            lcd.print("  INICIAR           ");
+            if (sonido == true) {
+                unPitido();
+                sonido = false;
+            }
+            if (digitalRead(pinEnt) == LOW) {
+                Estado = 10;
+                delay(500);
+            }
+            break;
+
+        case 2:
+           lcd.setCursor(0, 0);
+            lcd.print(" 18HS PRENDIDO      ");
+            lcd.setCursor(0, 1);
+            lcd.print(" 06HS APAGADO       ");
+            lcd.setCursor(0, 2);
+            lcd.print("                    ");
+            lcd.setCursor(0, 3);
+            lcd.print("  VOLVER            ");
+            if (sonido == true) {
+                unPitido();
+                sonido = false;
+            }
+            if (digitalRead(pinEnt) == LOW) {
+                POSICION = 1;
+                Estado = 1;
+                delay(500);
+            }
+            break;
+          }
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 0         ////////////////////////////          
+
+    } else if (Estado == 0) {
+      lcd.setCursor(0, 0);
+      lcd.print("                    ");
+      lcd.setCursor(0, 1);
+      lcd.print("     CANCELANDO     ");
+      lcd.setCursor(0, 2);
+      lcd.print("          3         ");
+      lcd.setCursor(0, 3);
+      lcd.print("                    ");
+      delay(800);
+      lcd.setCursor(10, 2);
+      lcd.print("2");
+      delay(800);
+      lcd.setCursor(10, 2);
+      lcd.print("1");
+      delay(800);
+      digitalWrite(RELE, LOW);
+      tresPitidos();
+      Estado = 1;
+     
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 10         ///////////////////////////  
+
+    } else if (Estado == 10) {
+      DateTime fecha = rtc.now();
+      
+      if (posicionHora != anteriorHora) {
+          anteriorHora = posicionHora;
+      }
+      if (posicionHora > 23) {
+          posicionHora = 0;
+      } else if (posicionHora < 0) {
+          posicionHora = 23;
+      } 
+
+     // int horaInicial = 0;
+      lcd.setCursor(0, 0);
+      lcd.print("Hora actual:");
+      lcd.setCursor(12,0);
+      lcd.print(" ");
+      if(fecha.hour() < 10){
+        lcd.setCursor(13, 0);
+        lcd.print("0");
+        lcd.setCursor(14, 0);
+        lcd.print(fecha.hour());
+      } else if(fecha.hour() >= 10){
+        lcd.setCursor(13,0);
+        lcd.print(fecha.hour());
+      }
+      lcd.setCursor(15,0);
+      lcd.print(":");
+      if(fecha.minute() < 10){
+        lcd.setCursor(16, 0);
+        lcd.print("0");
+        lcd.setCursor(17, 0);
+        lcd.print(fecha.minute());
+      } else if(fecha.minute() >= 10){
+        lcd.setCursor(16,0);
+        lcd.print(fecha.minute());
+      }
+      lcd.setCursor(0, 1);
+      lcd.print("   ELIGE LA HORA    ");
+      lcd.setCursor(0, 2);
+      lcd.print("   PARA INICIAR     ");
+      
+      if(posicionHora < 10){
+        lcd.setCursor(0, 3);
+        lcd.print("0");
+        lcd.setCursor(1, 3);
+        lcd.print(posicionHora);
+        lcd.setCursor(4,3);
+        lcd.print("formato 24 hs!");
+      } else if(posicionHora >= 10){
+        lcd.setCursor(0,3);
+        lcd.print(posicionHora);
+        lcd.setCursor(4,3);
+        lcd.print("formato 24 hs!");
+      }   
+      lcd.setCursor(2, 3);
+      lcd.print("  ");
+      if (digitalRead(pinEnt) == LOW) {
+          horaInicial = posicionHora;
+          Estado = 11;// cambiar esto generar nuevo estado
+          delay(500);
+      }
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 11         ///////////////////////////  
+
+    } else if (Estado == 11) {
+      DateTime fecha = rtc.now();
+      if (posicionMinuto != anteriorMinuto) {
+          anteriorMinuto = posicionMinuto;
+      }
+      if (posicionMinuto > 59) {
+          posicionMinuto = 1;
+      } else if (posicionMinuto < 1) {
+          posicionMinuto = 59;
+      } 
+
+      //int minutoInicial = 0;
+      lcd.setCursor(0, 0);
+      lcd.print("Hora actual:");
+      lcd.setCursor(12,0);
+      lcd.print(" ");
+      if(fecha.hour() < 10){
+        lcd.setCursor(13, 0);
+        lcd.print("0");
+        lcd.setCursor(14, 0);
+        lcd.print(fecha.hour());
+      } else if(fecha.hour() >= 10){
+        lcd.setCursor(13,0);
+        lcd.print(fecha.hour());
+      }
+      lcd.setCursor(15,0);
+      lcd.print(":");
+      if(fecha.minute() < 10){
+        lcd.setCursor(16, 0);
+        lcd.print("0");
+        lcd.setCursor(17, 0);
+        lcd.print(fecha.minute());
+      } else if(fecha.minute() >= 10){
+        lcd.setCursor(16,0);
+        lcd.print(fecha.minute());
+      }
+
+        lcd.setCursor(0, 1);
+        lcd.print(" ELIGE LOS MINUTOS  ");
+        lcd.setCursor(0, 2);
+        lcd.print("    PARA INICIAR    ");
+      if(posicionMinuto < 10){
+        lcd.setCursor(0, 3);
+        lcd.print("0");
+        lcd.setCursor(1, 3);
+        lcd.print(posicionMinuto);
+        lcd.setCursor(4,3);
+        lcd.print("formato 24 hs!");
+      } else if(posicionMinuto >= 10){
+        lcd.setCursor(0,3);
+        lcd.print(posicionMinuto);
+        lcd.setCursor(4,3);
+        lcd.print("formato 24 hs!");
+      }
+      lcd.setCursor(2, 3);
+      lcd.print("  ");   
+      if (digitalRead(pinEnt) == LOW) {
+          minutoInicial = posicionMinuto;
+          Estado = 12;
+          delay(500);
+      }
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 12         ///////////////////////////       
+
+    } else if (Estado == 12){
+      DateTime fecha = rtc.now();
+      // Control de tiempo para cambiar de estado
+      enciendeFotoDos = true; //para que prenda la luz si es la hora y se encuentra en el mensaje cancelar
+      vuelveEstadoDoce = true;//para que vuelva a la espera del ciclo elegido mostrando el mensaje foto activado
+      mensajeCancelar(); //espera 30 segundos que se reinicia y va al mensaje cancelar durante 4 segundos despues vuelve
+
+      lcd.setCursor(0, 0);
+      lcd.print("  18HS.ON-06HS.OFF  ");
+      lcd.setCursor(0, 1);
+      lcd.print("      ACTIVADO!     ");
+      lcd.setCursor(0, 2);
+      lcd.print("Inicia: ");
+      if (horaInicial < 10) {
+        lcd.setCursor(8, 2);
+        lcd.print("0");
+        lcd.setCursor(9, 2);
+        lcd.print(horaInicial);
+      } else {
+        lcd.setCursor(8, 2);
+        lcd.print(horaInicial);
+      }
+      lcd.setCursor(10, 2);
+      lcd.print(":");
+      if (minutoInicial < 10) {
+        lcd.setCursor(11, 2);
+        lcd.print("0");
+        lcd.setCursor(12, 2);
+        lcd.print(minutoInicial);
+        lcd.setCursor(13, 2);
+        lcd.print("hs ");
+      } else {
+        lcd.setCursor(11, 2);
+        lcd.print(minutoInicial);
+        lcd.setCursor(13, 2);
+        lcd.print("hs ");
+      }
+      lcd.setCursor(0, 3);
+      lcd.print("Termina: ");
+      if (horaFinal < 10) {
+        lcd.setCursor(9, 3);
+        lcd.print("0");
+        lcd.setCursor(10, 3);
+        lcd.print(horaFinal);
+      } else {
+        lcd.setCursor(9, 3);
+        lcd.print(horaFinal);
+      }
+      lcd.setCursor(11, 3);
+      lcd.print(":");
+      if (minutoInicial < 10) {
+        lcd.setCursor(12, 3);
+        lcd.print("0");
+        lcd.setCursor(13, 3);
+        lcd.print(minutoInicial);
+        lcd.setCursor(14, 3);
+        lcd.print("hs  ");
+      } else {
+        lcd.setCursor(12, 3);
+        lcd.print(minutoInicial);
+        lcd.setCursor(14, 3);
+        lcd.print("hs  ");
+      }
+      
+        switch (horaInicial) {
+        case 0: horaFinal = 18; break;
+        case 1: horaFinal = 19; break;
+        case 2: horaFinal = 20; break;
+        case 3: horaFinal = 21; break;
+        case 4: horaFinal = 22; break;
+        case 5: horaFinal = 23; break;
+        case 6: horaFinal = 0; break;
+        case 7: horaFinal = 1; break;
+        case 8: horaFinal = 2; break;
+        case 9: horaFinal = 3; break;
+        case 10: horaFinal = 4; break;
+        case 11: horaFinal = 5; break;
+        case 12: horaFinal = 6; break;
+        case 13: horaFinal = 7; break;
+        case 14: horaFinal = 8; break;
+        case 15: horaFinal = 9; break;
+        case 16: horaFinal = 10; break;
+        case 17: horaFinal = 11; break;
+        case 18: horaFinal = 12; break;
+        case 19: horaFinal = 13; break;
+        case 20: horaFinal = 14; break;
+        case 21: horaFinal = 15; break;
+        case 22: horaFinal = 16; break;
+        case 23: horaFinal = 17; break;
+      }
+    
+      if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial) {
+        lcd.clear();
+        vuelveEstadoDoce = false; //lo pone en falso ya que sale de la espera del ciclo y se va al estado dnd prende luz
+        Estado = 13;
+      }
+    
+      // Cambiar a Estado 0 solo después de 3 segundos
+      if (digitalRead(pinEnt) == LOW) {
+        if (millis() - tiempoInicio >= 3000) {
+          tiempoInicio = millis(); // Reiniciar el tiempo
+          POSICION = 1;
+          vuelveEstadoDoce = false;// Como se va al menu principal pone en falso la vuelta al estado donde muestra mensaje activado
+          Estado = 0;
+        }
+      } else {
+        // Si el botón no está presionado, reiniciar el tiempo
+        tiempoInicio = millis();
+      }
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 13         /////////////////////////// 
+
+    } else if (Estado == 13){
+      DateTime fecha = rtc.now();
+      enciendeFotoDos = true;
+      vuelveEstadoTrece = true; // activa la vuelta al estado de luz prendida para mostrar el mensaje de cancelar
+      mensajeCancelar();
+
+      digitalWrite(RELE, HIGH);
+      lcd.setCursor(0, 0);
+      lcd.print("    LA LUZ ESTA     ");
+      lcd.setCursor(0, 1);
+      lcd.print("     PRENDIDA!      ");
+      lcd.setCursor(0, 2);
+      lcd.print("                    ");
+      lcd.setCursor(0, 3);
+      lcd.print("Se apaga: ");
+      if(horaFinal < 10){
+        lcd.setCursor(10, 3);
+        lcd.print("0");
+        lcd.setCursor(11, 3);
+        lcd.print(horaFinal);
+      } else if(horaFinal >= 10){
+        lcd.setCursor(10,3);
+        lcd.print(horaFinal);
+      }   
+      lcd.setCursor(12,3);
+      lcd.print(":");
+      if(minutoInicial < 10){
+        lcd.setCursor(13, 3);
+        lcd.print("0");
+        lcd.setCursor(14, 3);
+        lcd.print(minutoInicial);
+        lcd.setCursor(15,3);
+        lcd.print("hs ");
+      } else if(minutoInicial >= 10){
+        lcd.setCursor(13,3);
+        lcd.print(minutoInicial);
+        lcd.setCursor(15,3);
+        lcd.print("hs ");
+      }   
+
+      if (fecha.hour() == horaFinal && fecha.minute() == minutoInicial) {
+          lcd.clear();
+          vuelveEstadoTrece = false;//pone en falso la vuelta al estado seis ya que se va del estado luz prendida
+          enciendeFotoDos = false;//pone en falso el encendido del ciclo en el caso de que se este mostrando el mensaje cancelar ya que pasa al estado de luz apagada
+          apagaFotoDos = true;//activa el apagado de la luz para el mensaje cancelar ya que va al estado de luz apagada
+          Estado = 14;
+      }
+      if (digitalRead(pinEnt) == LOW) {
+        if (millis() - tiempoInicio >= 3000) {
+          tiempoInicio = millis(); // Reiniciar el tiempo
+          POSICION = 1;
+          //deja todos los booleanos apagados ya que se va al mensaje de cancelando y luego al menu inicial
+          vuelveEstadoTrece = false;
+          enciendeFotoDos = false;
+          apagaFotoDos = false;
+          Estado = 0;
+        }
+      } else {
+        // Si el botón no está presionado, reiniciar el tiempo
+        tiempoInicio = millis();
+      }
+
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////           ESTADO 14         ///////////////////////////
+
+    } else if (Estado == 14) {
+      DateTime fecha = rtc.now();
+        digitalWrite(RELE, LOW);
+
+        vuelveEstadoCatorce = true;
         mensajeCancelar();
 
         lcd.setCursor(0, 0);
@@ -674,135 +1223,22 @@ void loop() {
            
         if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial) {
         lcd.clear();
-        vuelveEstadoSiete = false;
-        Estado = 6;
+        vuelveEstadoCatorce = false;
+        Estado = 13;
         }
 
         if (digitalRead(pinEnt) == LOW) {
           if (millis() - tiempoInicio >= 3000) {
             tiempoInicio = millis(); // Reiniciar el tiempo
             POSICION = 1;
-            vuelveEstadoSiete = false;
+            vuelveEstadoCatorce = false;
             Estado = 0;
           }
         } else {
           // Si el botón no está presionado, reiniciar el tiempo
           tiempoInicio = millis();
         }
-
-
-    } else if (Estado == 8) {
-      DateTime fecha = rtc.now();
-
-        if (enciendeFotoUno == true){
-          if (fecha.hour() == horaInicial && fecha.minute() == minutoInicial) {
-            lcd.clear();
-            vuelveEstadoCinco = false;
-            Estado = 6;
-          }
-        } else if (apagaFotoUno == true){
-          if (fecha.hour() == horaFinal && fecha.minute() == minutoInicial) {
-            lcd.clear();
-            vuelveEstadoSeis = false;
-           // enciendeFotoUno = false;
-           // apagaFotoUno = false;
-            Estado = 7;
-         }
-        }
-
-        lcd.setCursor(0, 0);
-        lcd.print(" Presiona durante 3 ");
-        lcd.setCursor(0, 1);
-        lcd.print(" segundos el boton  ");
-        lcd.setCursor(0, 2);
-        lcd.print(" para cancelar e ir ");
-        lcd.setCursor(0, 3);
-        lcd.print(" al menu principal  ");
-
-        if (millis() - tiempoInicio > 4000 && vuelveEstadoCinco == true){
-          tiempoInicio = millis();
-          lcd.clear();
-          Estado = 5;
-         } else if (millis() - tiempoInicio > 4000 && vuelveEstadoSeis == true){
-          tiempoInicio = millis();
-          lcd.clear();
-          Estado = 6;
-         } else if (millis() - tiempoInicio > 4000 && vuelveEstadoSiete == true){
-          tiempoInicio = millis();
-          lcd.clear();
-          Estado = 7;
-         }
-    } else if (Estado == 9){
-      if (POSICION != ANTERIOR) {
-        ANTERIOR = POSICION;
     }
-    if (POSICION > 2) {
-        POSICION = 1;
-    } else if (POSICION < 1) {
-        POSICION = 2;
-    }
-
-    switch (POSICION) {
-        case 1:
-            lcd.setCursor(0, 0);
-            lcd.print(" CAMBIAR            ");
-            lcd.setCursor(0, 1);
-            lcd.print(" 04HS APAGADO       ");
-            lcd.setCursor(0, 2);
-            lcd.print("                    ");
-            lcd.setCursor(0, 3);
-            lcd.print("  INICIAR           ");
-            if (sonido == true) {
-                unPitido();
-                sonido = false;
-            }
-            if (digitalRead(pinEnt) == LOW) {
-                Estado = 3;
-                delay(500);
-            }
-            break;
-
-        case 2:
-            lcd.setCursor(0, 0);
-            lcd.print(" CAMBIAR            ");
-            lcd.setCursor(0, 1);
-            lcd.print(" 04HS APAGADO       ");
-            lcd.setCursor(0, 2);
-            lcd.print("                    ");
-            lcd.setCursor(0, 3);
-            lcd.print("  VOLVER            ");
-            if (sonido == true) {
-                unPitido();
-                sonido = false;
-            }
-            if (digitalRead(pinEnt) == LOW) {
-                POSICION = 1;
-                Estado = 1;
-                delay(500);
-            }
-            break;
-          }
-          
-    } else if (Estado == 0) {
-      lcd.setCursor(0, 0);
-      lcd.print("                    ");
-      lcd.setCursor(0, 1);
-      lcd.print("     CANCELANDO     ");
-      lcd.setCursor(0, 2);
-      lcd.print("          3         ");
-      lcd.setCursor(0, 3);
-      lcd.print("                    ");
-      delay(800);
-      lcd.setCursor(10, 2);
-      lcd.print("2");
-      delay(800);
-      lcd.setCursor(10, 2);
-      lcd.print("1");
-      delay(800);
-      digitalWrite(RELE, LOW);
-      tresPitidos();
-      Estado = 1;
-    } 
 }
     
       
